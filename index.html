@@ -1,0 +1,4050 @@
+```html
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>GCL — Genius Configuration and Log</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       THEME TOKENS: LIGHT (DEFAULT), GREYSCALE, DARK
+       ========================================================================== */
+    :root,
+    [data-theme="light"] {
+      --bg-app: #f1f5f9;
+      --bg-surface: #ffffff;
+      --bg-elevated: #f8fafc;
+      --bg-muted: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border-color: #cbd5e1;
+      --border-strong: #94a3b8;
+      --accent-primary: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-soft: #dbeafe;
+      --accent-text: #1e40af;
+
+      /* Status Colors */
+      --status-open-bg: #fee2e2;
+      --status-open-text: #991b1b;
+      --status-open-border: #f87171;
+
+      --status-prog-bg: #fef3c7;
+      --status-prog-text: #92400e;
+      --status-prog-border: #fbbf24;
+
+      --status-closed-bg: #d1fae5;
+      --status-closed-text: #065f46;
+      --status-closed-border: #34d399;
+
+      --lru-badge-bg: #e0e7ff;
+      --lru-badge-text: #3730a3;
+      --sru-badge-bg: #f1f5f9;
+      --sru-badge-text: #0f172a;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    [data-theme="greyscale"] {
+      --bg-app: #e5e5e5;
+      --bg-surface: #ffffff;
+      --bg-elevated: #f5f5f5;
+      --bg-muted: #d4d4d4;
+      --text-primary: #0a0a0a;
+      --text-secondary: #262626;
+      --text-muted: #525252;
+      --border-color: #a3a3a3;
+      --border-strong: #404040;
+      --accent-primary: #171717;
+      --accent-hover: #000000;
+      --accent-soft: #e5e5e5;
+      --accent-text: #0a0a0a;
+
+      /* High-contrast monochrome status indicators */
+      --status-open-bg: #171717;
+      --status-open-text: #ffffff;
+      --status-open-border: #000000;
+
+      --status-prog-bg: #e5e5e5;
+      --status-prog-text: #0a0a0a;
+      --status-prog-border: #171717;
+
+      --status-closed-bg: #ffffff;
+      --status-closed-text: #404040;
+      --status-closed-border: #737373;
+
+      --lru-badge-bg: #262626;
+      --lru-badge-text: #ffffff;
+      --sru-badge-bg: #e5e5e5;
+      --sru-badge-text: #171717;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.14);
+      --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.18);
+    }
+
+    [data-theme="dark"] {
+      --bg-app: #090d16;
+      --bg-surface: #111827;
+      --bg-elevated: #1e293b;
+      --bg-muted: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --border-color: #1f2937;
+      --border-strong: #475569;
+      --accent-primary: #3b82f6;
+      --accent-hover: #60a5fa;
+      --accent-soft: rgba(59, 130, 246, 0.18);
+      --accent-text: #93c5fd;
+
+      --status-open-bg: rgba(239, 68, 68, 0.2);
+      --status-open-text: #fca5a5;
+      --status-open-border: #ef4444;
+
+      --status-prog-bg: rgba(245, 158, 11, 0.2);
+      --status-prog-text: #fcd34d;
+      --status-prog-border: #f59e0b;
+
+      --status-closed-bg: rgba(16, 185, 129, 0.2);
+      --status-closed-text: #6ee7b7;
+      --status-closed-border: #10b981;
+
+      --lru-badge-bg: rgba(99, 102, 241, 0.22);
+      --lru-badge-text: #a5b4fc;
+      --sru-badge-bg: #1e293b;
+      --sru-badge-text: #e2e8f0;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .font-mono-code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Theme helper classes */
+    .t-surface {
+      background-color: var(--bg-surface);
+      border-color: var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+    .t-elevated {
+      background-color: var(--bg-elevated);
+      border-color: var(--border-color);
+    }
+    .t-muted-bg {
+      background-color: var(--bg-muted);
+    }
+    .t-text-primary { color: var(--text-primary); }
+    .t-text-secondary { color: var(--text-secondary); }
+    .t-text-muted { color: var(--text-muted); }
+    .t-border { border-color: var(--border-color); }
+    .t-border-strong { border-color: var(--border-strong); }
+
+    .t-btn-primary {
+      background-color: var(--accent-primary);
+      color: #ffffff;
+    }
+    .t-btn-primary:hover {
+      background-color: var(--accent-hover);
+    }
+    .t-btn-soft {
+      background-color: var(--accent-soft);
+      color: var(--accent-text);
+      border: 1px solid var(--border-color);
+    }
+
+    /* Status Pill Styling */
+    .badge-open {
+      background-color: var(--status-open-bg);
+      color: var(--status-open-text);
+      border: 1.5px solid var(--status-open-border);
+    }
+    .badge-in-progress {
+      background-color: var(--status-prog-bg);
+      color: var(--status-prog-text);
+      border: 1.5px dashed var(--status-prog-border);
+    }
+    [data-theme="light"] .badge-in-progress,
+    [data-theme="dark"] .badge-in-progress {
+      border-style: solid;
+    }
+    .badge-closed {
+      background-color: var(--status-closed-bg);
+      color: var(--status-closed-text);
+      border: 1.5px solid var(--status-closed-border);
+    }
+
+    .badge-lru {
+      background-color: var(--lru-badge-bg);
+      color: var(--lru-badge-text);
+    }
+    .badge-sru {
+      background-color: var(--sru-badge-bg);
+      color: var(--sru-badge-text);
+      border: 1px solid var(--border-color);
+    }
+
+    /* Form Controls */
+    .gcl-input {
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      border-radius: 0.625rem;
+      padding: 0.625rem 0.75rem;
+      font-size: 0.925rem;
+      width: 100%;
+      min-height: 44px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .gcl-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .gcl-input:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      background-color: var(--bg-elevated);
+    }
+
+    /* Tree connector lines */
+    .tree-branch {
+      position: relative;
+      padding-left: 1.15rem;
+    }
+    .tree-branch::before {
+      content: '';
+      position: absolute;
+      left: 0.35rem;
+      top: 0;
+      bottom: 0.75rem;
+      width: 2px;
+      background-color: var(--border-strong);
+    }
+    .tree-node {
+      position: relative;
+    }
+    .tree-node::before {
+      content: '';
+      position: absolute;
+      left: -0.8rem;
+      top: 1.4rem;
+      width: 0.75rem;
+      height: 2px;
+      background-color: var(--border-strong);
+    }
+
+    /* Highlight pulse animation when jumping from global Find */
+    @keyframes highlightPulse {
+      0% { box-shadow: 0 0 0 0 var(--accent-primary); transform: scale(1.01); }
+      50% { box-shadow: 0 0 0 6px var(--accent-soft); transform: scale(1.01); }
+      100% { box-shadow: 0 0 0 0 transparent; transform: scale(1); }
+    }
+    .jump-highlight {
+      animation: highlightPulse 1.8s ease-out 2;
+      border-color: var(--accent-primary) !important;
+      border-width: 2px !important;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-app);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-strong);
+      border-radius: 3px;
+    }
+
+    /* Print / PDF Styles */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      #printReportContainer {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      table {
+        page-break-inside: auto;
+        border-collapse: collapse;
+        width: 100%;
+      }
+      tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+      }
+      th, td {
+        border: 1px solid #333333 !important;
+        padding: 6px 8px !important;
+        font-size: 11px !important;
+        text-align: left;
+      }
+      th {
+        background-color: #f0f0f0 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col pb-20 md:pb-8">
+
+  <!-- ========================================================================
+       MAIN APPLICATION WRAPPER (Hidden during native browser print)
+       ======================================================================== -->
+  <div id="appShell" class="no-print flex-1 flex flex-col">
+
+    <!-- STICKY TOP HEADER -->
+    <header class="t-surface border-b sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5">
+        <!-- Row 1: Brand, Operator Pill, Theme Switcher & JSON File Actions -->
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <!-- Brand Logo & Title -->
+          <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 rounded-xl t-btn-primary flex items-center justify-center font-extrabold text-lg shadow-sm shrink-0">
+              <i class="fa-solid fa-microchip"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 class="font-extrabold text-base sm:text-lg tracking-tight leading-none">GCL</h1>
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full t-elevated border t-text-secondary">v2.4 Field</span>
+              </div>
+              <p class="text-xs t-text-muted hidden sm:block">Genius Configuration &amp; Log Management</p>
+            </div>
+          </div>
+
+          <!-- Right Controls: Operator, Theme, JSON Save/Load -->
+          <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+            <!-- Active Operator Pill Button -->
+            <button onclick="openOperatorModal()" class="min-h-[40px] px-2.5 sm:px-3 py-1.5 rounded-xl t-elevated border flex items-center gap-2 text-xs sm:text-sm font-medium hover:opacity-90 transition" title="Set Active Technician / Engineer Username">
+              <i class="fa-solid fa-user-gear text-blue-500"></i>
+              <span class="t-text-muted hidden md:inline">User:</span>
+              <span id="headerOperatorName" class="font-bold truncate max-w-[90px] sm:max-w-[130px]">Alex.K</span>
+              <i class="fa-solid fa-pen text-[10px] t-text-muted"></i>
+            </button>
+
+            <!-- 3-Theme Switcher (Light / Greyscale / Dark) -->
+            <div class="flex items-center rounded-xl t-elevated border p-0.5" role="group" aria-label="Theme Toggle">
+              <button onclick="setTheme('light')" id="themeBtn-light" class="min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition" title="Light Theme (Default)">
+                <i class="fa-solid fa-sun"></i>
+                <span class="hidden lg:inline">Light</span>
+              </button>
+              <button onclick="setTheme('greyscale')" id="themeBtn-greyscale" class="min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition" title="High-Contrast Greyscale Theme">
+                <i class="fa-solid fa-circle-half-stroke"></i>
+                <span class="hidden lg:inline">Grey</span>
+              </button>
+              <button onclick="setTheme('dark')" id="themeBtn-dark" class="min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition" title="Dark Lab Theme">
+                <i class="fa-solid fa-moon"></i>
+                <span class="hidden lg:inline">Dark</span>
+              </button>
+            </div>
+
+            <!-- JSON File Dropdown / Buttons -->
+            <div class="flex items-center gap-1">
+              <input type="file" id="jsonFileInput" accept=".json,application/json" class="hidden" onchange="handleLoadJsonFile(event)" />
+              <button onclick="document.getElementById('jsonFileInput').click()" class="min-h-[40px] px-2.5 sm:px-3 py-1.5 rounded-xl t-elevated border text-xs sm:text-sm font-semibold flex items-center gap-1.5 hover:opacity-80 transition" title="Load Database from JSON File">
+                <i class="fa-solid fa-folder-open"></i>
+                <span class="hidden sm:inline">Load JSON</span>
+              </button>
+              <button onclick="saveDatabaseToJson()" class="min-h-[40px] px-2.5 sm:px-3 py-1.5 rounded-xl t-btn-primary text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-sm transition" title="Save Database to JSON File">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span class="hidden sm:inline">Save JSON</span>
+              </button>
+              <button onclick="openDataMenuModal()" class="min-h-[40px] w-9 rounded-xl t-elevated border flex items-center justify-center text-sm hover:opacity-80 transition" title="Database Info & Reset Options">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: Global "Find" Bar + Desktop Navigation Tabs -->
+        <div class="mt-2.5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
+          <!-- Global "Find" Search Input -->
+          <div class="relative flex-1">
+            <div class="relative flex items-center">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 t-text-muted text-sm pointer-events-none"></i>
+              <input
+                type="text"
+                id="globalSearchInput"
+                oninput="handleGlobalSearch(this.value)"
+                onfocus="handleGlobalSearch(this.value)"
+                placeholder="Find anything: System, LRU, SRU, S/N, HW/SW ver, fault text, user..."
+                class="gcl-input pl-9 pr-9 py-2 text-sm min-h-[42px]"
+              />
+              <button
+                id="clearGlobalSearchBtn"
+                onclick="clearGlobalSearch()"
+                class="hidden absolute right-2.5 w-7 h-7 rounded-full t-elevated flex items-center justify-center t-text-muted hover:t-text-primary"
+                title="Clear Find"
+              >
+                <i class="fa-solid fa-xmark text-xs"></i>
+              </button>
+            </div>
+
+            <!-- Instant Categorized Search Results Overlay -->
+            <div id="globalSearchOverlay" class="hidden absolute left-0 right-0 top-full mt-1.5 t-surface border t-border-strong rounded-2xl shadow-2xl max-h-[75vh] overflow-y-auto z-50 p-3">
+              <!-- Populated dynamically by JS -->
+            </div>
+          </div>
+
+          <!-- Desktop Navigation Bar (Hidden on Mobile, replaced by Bottom Bar) -->
+          <nav class="hidden md:flex items-center gap-1 t-elevated p-1 rounded-xl border shrink-0">
+            <button onclick="switchTab('status')" id="desktopTab-status" class="px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition">
+              <i class="fa-solid fa-sitemap"></i>
+              <span>System Status</span>
+            </button>
+            <button onclick="switchTab('logs')" id="desktopTab-logs" class="px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span>Malfunctions</span>
+              <span id="desktopOpenFaultBadge" class="px-1.5 py-0.2 rounded-full text-[11px] badge-open">0</span>
+            </button>
+            <button onclick="switchTab('setup')" id="desktopTab-setup" class="px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition">
+              <i class="fa-solid fa-sliders"></i>
+              <span>System Setup</span>
+              <i id="desktopSetupLockIcon" class="fa-solid fa-lock text-[10px] opacity-75"></i>
+            </button>
+            <button onclick="switchTab('history')" id="desktopTab-history" class="px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+              <span>History Log</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <!-- ======================================================================
+         MAIN CONTENT CONTAINER
+         ====================================================================== -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4">
+
+      <!-- ====================================================================
+           TAB 1: SYSTEM STATUS (OPERATIONAL VIEW)
+           ==================================================================== -->
+      <section id="view-status" class="space-y-4">
+        <!-- Control Bar: System Selector, HW/SW Toggle, Export & Quick Fault -->
+        <div class="t-surface border rounded-2xl p-3.5 sm:p-4 space-y-3">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <!-- System Selector Dropdown + Quick Pills -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-1">
+              <label for="statusSystemSelect" class="text-xs font-bold uppercase tracking-wider t-text-muted shrink-0">
+                Active System:
+              </label>
+              <div class="flex items-center gap-2 flex-1 max-w-md">
+                <select id="statusSystemSelect" onchange="handleSelectStatusSystem(this.value)" class="gcl-input font-bold text-sm py-2">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+              <!-- Summary Counter Pills -->
+              <div id="statusSystemSummaryPills" class="flex flex-wrap items-center gap-1.5 text-xs">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Action Buttons: Show/Hide HW/SW Versions, + Log Fault, CSV & PDF -->
+            <div class="flex flex-wrap items-center gap-2">
+              <!-- Prominent Toggle Button for HW & SW Versions -->
+              <button
+                id="toggleHwSwBtn"
+                onclick="toggleShowHwSwVersions()"
+                class="min-h-[44px] flex-1 sm:flex-initial px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border transition"
+              >
+                <i class="fa-solid fa-code-branch"></i>
+                <span id="toggleHwSwBtnText">Show HW/SW Versions</span>
+              </button>
+
+              <!-- Quick Log Malfunction for this System -->
+              <button
+                onclick="openMalfunctionModalForTarget(state.selectedSystemId, '', '')"
+                class="min-h-[44px] px-3.5 py-2 rounded-xl t-btn-primary font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-sm transition"
+              >
+                <i class="fa-solid fa-plus"></i>
+                <span>Log Fault</span>
+              </button>
+
+              <!-- Export CSV & PDF for Current System Status -->
+              <div class="flex items-center gap-1.5">
+                <button
+                  onclick="exportSystemStatusCSV()"
+                  class="min-h-[44px] px-3 py-2 rounded-xl t-elevated border font-semibold text-xs flex items-center gap-1.5 hover:opacity-80 transition"
+                  title="Export Current System Configuration to CSV"
+                >
+                  <i class="fa-solid fa-file-csv text-emerald-600"></i>
+                  <span>CSV</span>
+                </button>
+                <button
+                  onclick="openReportPreview('status')"
+                  class="min-h-[44px] px-3 py-2 rounded-xl t-elevated border font-semibold text-xs flex items-center gap-1.5 hover:opacity-80 transition"
+                  title="Generate Printable / PDF System Configuration Report"
+                >
+                  <i class="fa-solid fa-file-pdf text-rose-600"></i>
+                  <span>PDF Report</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expand/Collapse All LRUs utility row -->
+          <div class="pt-2 border-t t-border flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div class="flex items-center gap-2 t-text-secondary">
+              <i class="fa-solid fa-circle-info t-text-muted"></i>
+              <span>Tap <strong>Update S/N &amp; Ver</strong> on any LRU or SRU to log a field replacement or software upgrade.</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <button onclick="expandAllStatusLrus(true)" class="font-semibold underline hover:opacity-80">Expand All LRUs</button>
+              <button onclick="expandAllStatusLrus(false)" class="font-semibold underline hover:opacity-80">Collapse All</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hierarchical System Tree Container -->
+        <div id="systemStatusTreeContainer" class="space-y-3">
+          <!-- Dynamically rendered LRU & SRU cards -->
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           TAB 2: MALFUNCTION LOG (OPERATIONAL FAULT & RESOLUTION TRACKING)
+           ==================================================================== -->
+      <section id="view-logs" class="hidden space-y-4">
+        <!-- Top Header & Primary Actions -->
+        <div class="t-surface border rounded-2xl p-3.5 sm:p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2.5">
+            <div>
+              <h2 class="text-base sm:text-lg font-extrabold flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-list text-blue-500"></i>
+                <span>System Malfunction &amp; Resolution Log</span>
+              </h2>
+              <p class="text-xs t-text-muted">Log malfunctions at System, LRU, or SRU level and track resolution progress.</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              <!-- New Malfunction Entry Button -->
+              <button
+                onclick="openMalfunctionModal()"
+                class="min-h-[44px] flex-1 sm:flex-initial px-4 py-2 rounded-xl t-btn-primary font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm"
+              >
+                <i class="fa-solid fa-plus-circle"></i>
+                <span>New Malfunction</span>
+              </button>
+
+              <!-- Toggle Filter Drawer on Mobile -->
+              <button
+                onclick="toggleMobileFilterPanel()"
+                class="min-h-[44px] sm:hidden px-3 py-2 rounded-xl t-elevated border font-bold text-xs flex items-center gap-1.5"
+              >
+                <i class="fa-solid fa-filter"></i>
+                <span>Filters</span>
+                <span id="mobileActiveFilterCount" class="hidden px-1.5 py-0.5 rounded-full text-[10px] t-btn-primary">0</span>
+              </button>
+
+              <!-- Export Filtered Malfunctions CSV / PDF -->
+              <button
+                onclick="exportMalfunctionsCSV()"
+                class="min-h-[44px] px-3 py-2 rounded-xl t-elevated border font-semibold text-xs flex items-center gap-1.5 hover:opacity-80"
+                title="Export Filtered Malfunction Log to CSV"
+              >
+                <i class="fa-solid fa-file-csv text-emerald-600"></i>
+                <span>CSV</span>
+              </button>
+              <button
+                onclick="openReportPreview('logs')"
+                class="min-h-[44px] px-3 py-2 rounded-xl t-elevated border font-semibold text-xs flex items-center gap-1.5 hover:opacity-80"
+                title="Generate Printable / PDF Malfunction Report"
+              >
+                <i class="fa-solid fa-file-pdf text-rose-600"></i>
+                <span>PDF Report</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 5-Way Filtering Panel (Always visible on >=sm, collapsible on phone) -->
+          <div id="malfunctionFilterPanel" class="pt-3 border-t t-border space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+              <!-- Filter 1: System Name -->
+              <div>
+                <label class="block text-[11px] font-bold uppercase t-text-muted mb-1">1. System Name</label>
+                <select id="filterSystem" onchange="handleLogFilterChange('system')" class="gcl-input text-xs py-2 min-h-[40px]">
+                  <option value="ALL">All Systems</option>
+                </select>
+              </div>
+
+              <!-- Filter 2: LRU -->
+              <div>
+                <label class="block text-[11px] font-bold uppercase t-text-muted mb-1">2. LRU</label>
+                <select id="filterLru" onchange="handleLogFilterChange('lru')" class="gcl-input text-xs py-2 min-h-[40px]">
+                  <option value="ALL">All LRUs</option>
+                </select>
+              </div>
+
+              <!-- Filter 3: SRU -->
+              <div>
+                <label class="block text-[11px] font-bold uppercase t-text-muted mb-1">3. SRU</label>
+                <select id="filterSru" onchange="handleLogFilterChange('sru')" class="gcl-input text-xs py-2 min-h-[40px]">
+                  <option value="ALL">All SRUs</option>
+                </select>
+              </div>
+
+              <!-- Filter 4: Username -->
+              <div>
+                <label class="block text-[11px] font-bold uppercase t-text-muted mb-1">4. Username</label>
+                <input
+                  type="text"
+                  id="filterUsername"
+                  list="operatorSuggestionsList"
+                  oninput="handleLogFilterChange('username')"
+                  placeholder="Any user..."
+                  class="gcl-input text-xs py-2 min-h-[40px]"
+                />
+              </div>
+
+              <!-- Filter 5: Status (Open, In Progress, Closed) -->
+              <div>
+                <label class="block text-[11px] font-bold uppercase t-text-muted mb-1">5. Status</label>
+                <select id="filterStatus" onchange="handleLogFilterChange('status')" class="gcl-input text-xs py-2 min-h-[40px]">
+                  <option value="ALL">All Statuses</option>
+                  <option value="Open">Open</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Closed">Closed</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Quick Status Filter Chips & Reset Button -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <div id="logStatusQuickChips" class="flex flex-wrap items-center gap-1.5 text-xs">
+                <!-- Populated dynamically with counts -->
+              </div>
+              <button onclick="resetMalfunctionFilters()" class="text-xs font-bold underline t-text-secondary hover:opacity-80">
+                Reset All Filters
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Malfunction Log Cards Container -->
+        <div id="malfunctionListContainer" class="space-y-3">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           TAB 3: SYSTEM SETUP (ARCHITECTURE BUILDER WITH LOCK TOGGLE)
+           ==================================================================== -->
+      <section id="view-setup" class="hidden space-y-4">
+        <!-- Safety Lock Banner -->
+        <div id="setupLockBanner" class="t-surface border-2 rounded-2xl p-3.5 sm:p-4 transition">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-start sm:items-center gap-3">
+              <div id="setupLockIconBadge" class="w-11 h-11 rounded-xl flex items-center justify-center text-lg shrink-0 t-elevated border">
+                <i class="fa-solid fa-lock"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-base sm:text-lg font-extrabold" id="setupLockTitle">System Setup is Locked</h2>
+                  <span id="setupLockStatusPill" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full t-elevated border">SAFE MODE</span>
+                </div>
+                <p class="text-xs t-text-muted" id="setupLockSubtitle">
+                  Architecture changes (adding/removing Systems, LRUs, SRUs, and custom field definitions) are locked to prevent accidental edits on mobile.
+                </p>
+              </div>
+            </div>
+
+            <!-- Lock / Unlock Toggle Button -->
+            <button
+              onclick="toggleSetupLock()"
+              id="setupLockToggleBtn"
+              class="min-h-[44px] px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shrink-0 transition"
+            >
+              <i class="fa-solid fa-unlock-keyhole"></i>
+              <span>Unlock System Setup</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- System Selection & Multi-System Operations (Create, Clone, Rename, Delete) -->
+        <div class="t-surface border rounded-2xl p-3.5 sm:p-4 space-y-3">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-1">
+              <label for="setupSystemSelect" class="text-xs font-bold uppercase tracking-wider t-text-muted shrink-0">
+                Editing System:
+              </label>
+              <select id="setupSystemSelect" onchange="handleSelectSetupSystem(this.value)" class="gcl-input font-bold text-sm py-2 max-w-md">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <!-- System-Level Architecture Buttons -->
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                onclick="openCreateSystemModal()"
+                class="setup-requires-unlock min-h-[44px] px-3.5 py-2 rounded-xl t-btn-primary font-bold text-xs flex items-center gap-1.5"
+              >
+                <i class="fa-solid fa-plus"></i>
+                <span>New System</span>
+              </button>
+              <button
+                onclick="openCloneSystemModal()"
+                class="setup-requires-unlock min-h-[44px] px-3.5 py-2 rounded-xl t-btn-soft font-bold text-xs flex items-center gap-1.5"
+              >
+                <i class="fa-solid fa-copy"></i>
+                <span>Clone System</span>
+              </button>
+              <button
+                onclick="openRenameSystemModal()"
+                class="setup-requires-unlock min-h-[44px] px-3 py-2 rounded-xl t-elevated border font-semibold text-xs flex items-center gap-1.5"
+              >
+                <i class="fa-solid fa-pen"></i>
+                <span>Rename</span>
+              </button>
+              <button
+                onclick="confirmDeleteSystem()"
+                class="setup-requires-unlock min-h-[44px] px-3 py-2 rounded-xl t-elevated border text-rose-600 font-semibold text-xs flex items-center gap-1.5"
+              >
+                <i class="fa-solid fa-trash-can"></i>
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Architecture Capacity & Add LRU Bar -->
+          <div class="pt-3 border-t t-border flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+              <span class="font-bold px-2.5 py-1 rounded-lg badge-lru" id="setupLruCountBadge">0 / 30 LRUs</span>
+              <span class="t-text-muted">Each LRU supports up to <strong>30 SRUs</strong>. Each LRU &amp; SRU supports <strong>0–10 HW/SW version fields</strong>.</span>
+            </div>
+
+            <button
+              onclick="openModuleSetupModal('ADD_LRU')"
+              id="addLruSetupBtn"
+              class="setup-requires-unlock min-h-[44px] px-4 py-2 rounded-xl t-btn-primary font-bold text-xs sm:text-sm flex items-center gap-1.5"
+            >
+              <i class="fa-solid fa-layer-group"></i>
+              <span>+ Add LRU to System</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Setup Tree Editor List -->
+        <div id="setupTreeContainer" class="space-y-3">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           TAB 4: HISTORY LOG (TIMESTAMPED AUDIT TRAIL)
+           ==================================================================== -->
+      <section id="view-history" class="hidden space-y-4">
+        <div class="t-surface border rounded-2xl p-3.5 sm:p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="text-base sm:text-lg font-extrabold flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-blue-500"></i>
+                <span>Timestamped Configuration &amp; Activity History</span>
+              </h2>
+              <p class="text-xs t-text-muted">Complete audit log of every S/N replacement, HW/SW version change, malfunction update, and architecture edit.</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button
+                onclick="exportHistoryCSV()"
+                class="min-h-[44px] px-3 py-2 rounded-xl t-elevated border font-semibold text-xs flex items-center gap-1.5 hover:opacity-80"
+              >
+                <i class="fa-solid fa-file-csv text-emerald-600"></i>
+                <span>CSV</span>
+              </button>
+              <button
+                onclick="openReportPreview('history')"
+                class="min-h-[44px] px-3 py-2 rounded-xl t-elevated border font-semibold text-xs flex items-center gap-1.5 hover:opacity-80"
+              >
+                <i class="fa-solid fa-file-pdf text-rose-600"></i>
+                <span>PDF Report</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- History Filter Row -->
+          <div class="pt-3 border-t t-border grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            <div>
+              <label class="block text-[11px] font-bold uppercase t-text-muted mb-1">System</label>
+              <select id="historyFilterSystem" onchange="renderHistoryView()" class="gcl-input text-xs py-2 min-h-[40px]">
+                <option value="ALL">All Systems</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase t-text-muted mb-1">Category</label>
+              <select id="historyFilterCategory" onchange="renderHistoryView()" class="gcl-input text-xs py-2 min-h-[40px]">
+                <option value="ALL">All Event Categories</option>
+                <option value="SN_REPLACE">Serial Number Replacement</option>
+                <option value="VERSION_UPDATE">HW/SW Version Update</option>
+                <option value="FAULT_CREATED">Malfunction Logged</option>
+                <option value="FAULT_UPDATED">Malfunction / Resolution Updated</option>
+                <option value="SYSTEM_SETUP">System Architecture Setup</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase t-text-muted mb-1">Operator Username</label>
+              <input
+                type="text"
+                id="historyFilterUser"
+                oninput="renderHistoryView()"
+                placeholder="Filter by username..."
+                class="gcl-input text-xs py-2 min-h-[40px]"
+              />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold uppercase t-text-muted mb-1">Module / Change Search</label>
+              <input
+                type="text"
+                id="historyFilterText"
+                oninput="renderHistoryView()"
+                placeholder="LRU, SRU, S/N, version..."
+                class="gcl-input text-xs py-2 min-h-[40px]"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- History Timeline List -->
+        <div id="historyListContainer" class="space-y-2.5">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ======================================================================
+         MOBILE BOTTOM NAVIGATION BAR (4 TABS)
+         ====================================================================== -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 t-surface border-t z-40 px-2 py-1 flex items-center justify-around shadow-lg">
+      <button onclick="switchTab('status')" id="mobileTab-status" class="flex-1 py-2 rounded-xl flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition">
+        <i class="fa-solid fa-sitemap text-base"></i>
+        <span>Status</span>
+      </button>
+      <button onclick="switchTab('logs')" id="mobileTab-logs" class="relative flex-1 py-2 rounded-xl flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition">
+        <i class="fa-solid fa-triangle-exclamation text-base"></i>
+        <span>Fault Log</span>
+        <span id="mobileOpenFaultBadge" class="absolute top-1 right-4 px-1.5 py-0.2 rounded-full text-[10px] badge-open">0</span>
+      </button>
+      <button onclick="switchTab('setup')" id="mobileTab-setup" class="relative flex-1 py-2 rounded-xl flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition">
+        <i class="fa-solid fa-sliders text-base"></i>
+        <span>Setup</span>
+      </button>
+      <button onclick="switchTab('history')" id="mobileTab-history" class="flex-1 py-2 rounded-xl flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold transition">
+        <i class="fa-solid fa-clock-rotate-left text-base"></i>
+        <span>History</span>
+      </button>
+    </nav>
+
+    <!-- Datalist for Operator Username Autocomplete -->
+    <datalist id="operatorSuggestionsList"></datalist>
+
+    <!-- ======================================================================
+         MODAL 1: OPERATIONAL SERIAL NUMBER & HW/SW VERSION UPDATE MODAL
+         ====================================================================== -->
+    <div id="operationalUpdateModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="t-surface border w-full max-w-lg rounded-t-3xl sm:rounded-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-4 py-3.5 border-b t-border flex items-center justify-between">
+          <div>
+            <span id="opUpdateTypeBadge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded badge-lru">LRU</span>
+            <h3 id="opUpdateTitle" class="text-base font-extrabold mt-0.5">Update Module Configuration</h3>
+          </div>
+          <button onclick="closeModal('operationalUpdateModal')" class="w-9 h-9 rounded-full t-elevated flex items-center justify-center">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form id="operationalUpdateForm" onsubmit="submitOperationalUpdate(event)" class="p-4 space-y-4 overflow-y-auto">
+          <input type="hidden" id="opUpdateSystemId" />
+          <input type="hidden" id="opUpdateLruId" />
+          <input type="hidden" id="opUpdateSruId" />
+
+          <!-- Operator Username -->
+          <div>
+            <label class="block text-xs font-bold uppercase t-text-muted mb-1">Performed By (Username) *</label>
+            <input type="text" id="opUpdateUsername" list="operatorSuggestionsList" required class="gcl-input font-semibold" placeholder="Enter your username" />
+          </div>
+
+          <!-- Serial Number -->
+          <div>
+            <label class="block text-xs font-bold uppercase t-text-muted mb-1">Module Serial Number (S/N)</label>
+            <input type="text" id="opUpdateSerialNumber" class="gcl-input font-mono-code font-semibold" placeholder="e.g., SN-CSPU-9041" />
+          </div>
+
+          <!-- Custom HW/SW Version Fields (Values editable operationally) -->
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-bold uppercase t-text-muted">Hardware &amp; Software Version Fields</label>
+              <span id="opUpdateFieldsCount" class="text-xs t-text-muted">0 fields</span>
+            </div>
+            <div id="opUpdateCustomFieldsContainer" class="space-y-2">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- Reason / Maintenance Note (Optional, recorded in History) -->
+          <div>
+            <label class="block text-xs font-bold uppercase t-text-muted mb-1">Maintenance / Replacement Note (Optional)</label>
+            <input type="text" id="opUpdateNote" class="gcl-input text-sm" placeholder="e.g., Swapped faulty card during scheduled maintenance" />
+          </div>
+
+          <div class="pt-2 border-t t-border flex items-center justify-end gap-2">
+            <button type="button" onclick="closeModal('operationalUpdateModal')" class="min-h-[44px] px-4 py-2 rounded-xl t-elevated border font-bold text-xs">
+              Cancel
+            </button>
+            <button type="submit" class="min-h-[44px] px-5 py-2 rounded-xl t-btn-primary font-bold text-xs flex items-center gap-2">
+              <i class="fa-solid fa-check"></i>
+              <span>Save &amp; Log to History</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL 2: ADD / EDIT MALFUNCTION & RESOLUTION MODAL
+         ====================================================================== -->
+    <div id="malfunctionModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="t-surface border w-full max-w-2xl rounded-t-3xl sm:rounded-2xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-4 py-3.5 border-b t-border flex items-center justify-between">
+          <h3 id="malfunctionModalTitle" class="text-base sm:text-lg font-extrabold flex items-center gap-2">
+            <i class="fa-solid fa-screwdriver-wrench text-blue-500"></i>
+            <span>Log System Malfunction</span>
+          </h3>
+          <button onclick="closeModal('malfunctionModal')" class="w-9 h-9 rounded-full t-elevated flex items-center justify-center">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form id="malfunctionForm" onsubmit="submitMalfunctionForm(event)" class="p-4 space-y-3.5 overflow-y-auto">
+          <input type="hidden" id="malfEntryId" />
+
+          <!-- Row 1: Username & Status -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold uppercase t-text-muted mb-1">Username (Engineer / Tech) *</label>
+              <input type="text" id="malfUsername" list="operatorSuggestionsList" required class="gcl-input font-semibold" placeholder="e.g., Alex.K" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase t-text-muted mb-1">Malfunction Status *</label>
+              <select id="malfStatus" onchange="handleMalfStatusChange(this.value)" required class="gcl-input font-bold">
+                <option value="Open">Open</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 2: System, LRU (Optional), SRU (Optional, can be added later) -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-xl t-elevated border">
+            <div>
+              <label class="block text-xs font-bold uppercase t-text-muted mb-1">System *</label>
+              <select id="malfSystemSelect" onchange="populateMalfLruOptions()" required class="gcl-input text-sm">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase t-text-muted mb-1">
+                LRU <span class="font-normal text-[11px]">(Optional / Later)</span>
+              </label>
+              <select id="malfLruSelect" onchange="populateMalfSruOptions()" class="gcl-input text-sm">
+                <option value="">-- System Level (TBD) --</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase t-text-muted mb-1">
+                SRU <span class="font-normal text-[11px]">(Optional / Later)</span>
+              </label>
+              <select id="malfSruSelect" class="gcl-input text-sm">
+                <option value="">-- LRU Level / TBD --</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 3: Malfunction Date/Time & Separate Malfunction Description -->
+          <div class="space-y-2.5 p-3 rounded-xl border t-border">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <label class="text-xs font-extrabold uppercase tracking-wide flex items-center gap-1.5">
+                <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
+                <span>Malfunction Details</span>
+              </label>
+              <div class="flex items-center gap-2">
+                <label class="text-[11px] font-bold t-text-muted shrink-0">Malfunction Date/Time *:</label>
+                <input type="datetime-local" id="malfOccurredAt" required class="gcl-input text-xs py-1.5 min-h-[38px]" />
+              </div>
+            </div>
+            <div>
+              <textarea
+                id="malfDescription"
+                required
+                rows="3"
+                class="gcl-input text-sm"
+                placeholder="Describe symptoms, error codes, telemetry anomalies, or observed failure..."
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Row 4: Resolution Date/Time & Separate Resolution Description -->
+          <div class="space-y-2.5 p-3 rounded-xl border t-border">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <label class="text-xs font-extrabold uppercase tracking-wide flex items-center gap-1.5">
+                <i class="fa-solid fa-screwdriver-wrench text-emerald-500"></i>
+                <span>Resolution &amp; Corrective Action (Separate Field)</span>
+              </label>
+              <div class="flex items-center gap-2">
+                <label class="text-[11px] font-bold t-text-muted shrink-0">Resolved Date/Time:</label>
+                <input type="datetime-local" id="malfResolvedAt" class="gcl-input text-xs py-1.5 min-h-[38px]" />
+              </div>
+            </div>
+            <div>
+              <textarea
+                id="malfResolution"
+                rows="3"
+                class="gcl-input text-sm"
+                placeholder="Describe troubleshooting steps, module replacement, calibration, or software patch applied to resolve the issue..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t t-border flex items-center justify-between gap-2">
+            <button
+              type="button"
+              id="deleteMalfBtn"
+              onclick="confirmDeleteMalfunction()"
+              class="hidden min-h-[44px] px-3.5 py-2 rounded-xl t-elevated border text-rose-600 font-bold text-xs flex items-center gap-1.5"
+            >
+              <i class="fa-solid fa-trash-can"></i>
+              <span>Delete</span>
+            </button>
+            <div class="flex items-center gap-2 ml-auto">
+              <button type="button" onclick="closeModal('malfunctionModal')" class="min-h-[44px] px-4 py-2 rounded-xl t-elevated border font-bold text-xs">
+                Cancel
+              </button>
+              <button type="submit" class="min-h-[44px] px-5 py-2 rounded-xl t-btn-primary font-bold text-xs flex items-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Save Log Entry</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL 3: SYSTEM SETUP — ADD / EDIT LRU OR SRU & 0-10 CUSTOM FIELDS
+         ====================================================================== -->
+    <div id="moduleSetupModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="t-surface border w-full max-w-xl rounded-t-3xl sm:rounded-2xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-4 py-3.5 border-b t-border flex items-center justify-between">
+          <div>
+            <span id="setupModalBadge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded badge-lru">ARCHITECTURE SETUP</span>
+            <h3 id="setupModalTitle" class="text-base font-extrabold mt-0.5">Configure Module</h3>
+          </div>
+          <button onclick="closeModal('moduleSetupModal')" class="w-9 h-9 rounded-full t-elevated flex items-center justify-center">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form id="moduleSetupForm" onsubmit="submitModuleSetupForm(event)" class="p-4 space-y-4 overflow-y-auto">
+          <input type="hidden" id="setupModalMode" />
+          <input type="hidden" id="setupModalLruId" />
+          <input type="hidden" id="setupModalSruId" />
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold uppercase t-text-muted mb-1" id="setupModuleNameLabel">Module Name *</label>
+              <input type="text" id="setupModuleName" required class="gcl-input font-bold" placeholder="e.g., CSPU or sp" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase t-text-muted mb-1">Serial Number (S/N)</label>
+              <input type="text" id="setupModuleSn" class="gcl-input font-mono-code" placeholder="e.g., SN-10204" />
+            </div>
+          </div>
+
+          <!-- 0 to 10 Custom Hardware / Software Version Fields Builder -->
+          <div class="p-3 rounded-xl t-elevated border space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <h4 class="text-xs font-extrabold uppercase">HW / SW Version Fields (0 to 10)</h4>
+                <p class="text-[11px] t-text-muted">Define custom field names and initial version text.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="setupCustomFieldCountBadge" class="text-xs font-bold px-2 py-0.5 rounded t-surface border">0 / 10</span>
+                <button
+                  type="button"
+                  id="addSetupFieldRowBtn"
+                  onclick="addSetupCustomFieldRow('', '')"
+                  class="min-h-[36px] px-3 py-1.5 rounded-lg t-btn-primary text-xs font-bold flex items-center gap-1"
+                >
+                  <i class="fa-solid fa-plus"></i>
+                  <span>Add Field</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="setupCustomFieldsList" class="space-y-2">
+              <!-- Dynamic rows of [Field Name] [Version Value] [Remove] -->
+            </div>
+          </div>
+
+          <div class="pt-2 border-t t-border flex items-center justify-end gap-2">
+            <button type="button" onclick="closeModal('moduleSetupModal')" class="min-h-[44px] px-4 py-2 rounded-xl t-elevated border font-bold text-xs">
+              Cancel
+            </button>
+            <button type="submit" class="min-h-[44px] px-5 py-2 rounded-xl t-btn-primary font-bold text-xs flex items-center gap-2">
+              <i class="fa-solid fa-check"></i>
+              <span>Save Module Architecture</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL 4: SYSTEM CREATE / CLONE / RENAME MODAL
+         ====================================================================== -->
+    <div id="systemManageModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="t-surface border w-full max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl">
+        <div class="px-4 py-3.5 border-b t-border flex items-center justify-between">
+          <h3 id="systemManageModalTitle" class="text-base font-extrabold">Create System</h3>
+          <button onclick="closeModal('systemManageModal')" class="w-9 h-9 rounded-full t-elevated flex items-center justify-center">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form id="systemManageForm" onsubmit="submitSystemManageForm(event)" class="p-4 space-y-4">
+          <input type="hidden" id="systemManageMode" />
+
+          <!-- Source System (Shown only when Cloning) -->
+          <div id="cloneSourceContainer" class="hidden">
+            <label class="block text-xs font-bold uppercase t-text-muted mb-1">Source System to Clone</label>
+            <select id="cloneSourceSystemSelect" class="gcl-input font-semibold text-sm"></select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase t-text-muted mb-1">System Name *</label>
+            <input type="text" id="systemManageNameInput" required class="gcl-input font-bold" placeholder="e.g., Genius-Unit-02" />
+          </div>
+
+          <!-- Clone Options (Shown only when Cloning) -->
+          <div id="cloneOptionsContainer" class="hidden p-3 rounded-xl t-elevated border space-y-2.5 text-xs">
+            <p class="font-bold uppercase t-text-muted">Clone Data Options:</p>
+            <label class="flex items-start gap-2.5 cursor-pointer">
+              <input type="checkbox" id="cloneKeepVersionsCheckbox" checked class="mt-0.5 w-4 h-4" />
+              <span><strong>Copy HW/SW Version Values</strong> (Keep all custom field names and version values from source system)</span>
+            </label>
+            <label class="flex items-start gap-2.5 cursor-pointer">
+              <input type="checkbox" id="cloneKeepSerialsCheckbox" class="mt-0.5 w-4 h-4" />
+              <span><strong>Copy Serial Numbers</strong> (Uncheck to leave Serial Numbers blank for a new hardware unit)</span>
+            </label>
+          </div>
+
+          <div class="pt-2 border-t t-border flex items-center justify-end gap-2">
+            <button type="button" onclick="closeModal('systemManageModal')" class="min-h-[44px] px-4 py-2 rounded-xl t-elevated border font-bold text-xs">
+              Cancel
+            </button>
+            <button type="submit" class="min-h-[44px] px-5 py-2 rounded-xl t-btn-primary font-bold text-xs">
+              Confirm
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL 5: ACTIVE OPERATOR (USERNAME) & DATABASE MENU MODALS
+         ====================================================================== -->
+    <div id="operatorModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="t-surface border w-full max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl">
+        <div class="px-4 py-3.5 border-b t-border flex items-center justify-between">
+          <h3 class="text-base font-extrabold flex items-center gap-2">
+            <i class="fa-solid fa-user-gear text-blue-500"></i>
+            <span>Active Engineer / Technician</span>
+          </h3>
+          <button onclick="closeModal('operatorModal')" class="w-9 h-9 rounded-full t-elevated flex items-center justify-center">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <form onsubmit="saveOperatorName(event)" class="p-4 space-y-3.5">
+          <p class="text-xs t-text-secondary">
+            Your username is automatically attached to every malfunction log, resolution update, serial number swap, and version change.
+          </p>
+          <div>
+            <label class="block text-xs font-bold uppercase t-text-muted mb-1">Your Username (Free Text) *</label>
+            <input type="text" id="activeOperatorInput" list="operatorSuggestionsList" required class="gcl-input font-bold" placeholder="e.g., Alex.K" />
+          </div>
+          <div id="knownOperatorsChips" class="flex flex-wrap gap-1.5 pt-1"></div>
+          <div class="pt-2 border-t t-border flex justify-end gap-2">
+            <button type="button" onclick="closeModal('operatorModal')" class="min-h-[44px] px-4 py-2 rounded-xl t-elevated border font-bold text-xs">Cancel</button>
+            <button type="submit" class="min-h-[44px] px-5 py-2 rounded-xl t-btn-primary font-bold text-xs">Set Active User</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Database Info & Reset Demo Data Modal -->
+    <div id="dataMenuModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="t-surface border w-full max-w-md rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl">
+        <div class="px-4 py-3.5 border-b t-border flex items-center justify-between">
+          <h3 class="text-base font-extrabold flex items-center gap-2">
+            <i class="fa-solid fa-database text-blue-500"></i>
+            <span>GCL JSON Database Management</span>
+          </h3>
+          <button onclick="closeModal('dataMenuModal')" class="w-9 h-9 rounded-full t-elevated flex items-center justify-center">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="p-4 space-y-3 text-xs">
+          <div id="dbStatsSummary" class="p-3 rounded-xl t-elevated border space-y-1"></div>
+          <p class="t-text-secondary">
+            All changes are automatically cached in your browser and can be saved or shared with your engineering team as a portable <code>.json</code> file.
+          </p>
+          <div class="space-y-2 pt-2">
+            <button onclick="saveDatabaseToJson(); closeModal('dataMenuModal')" class="w-full min-h-[44px] px-4 py-2.5 rounded-xl t-btn-primary font-bold flex items-center justify-center gap-2">
+              <i class="fa-solid fa-download"></i>
+              <span>Download / Save GCL JSON File</span>
+            </button>
+            <button onclick="document.getElementById('jsonFileInput').click(); closeModal('dataMenuModal')" class="w-full min-h-[44px] px-4 py-2.5 rounded-xl t-elevated border font-bold flex items-center justify-center gap-2">
+              <i class="fa-solid fa-upload"></i>
+              <span>Load GCL JSON File from Device</span>
+            </button>
+            <button onclick="confirmResetDemoData()" class="w-full min-h-[44px] px-4 py-2.5 rounded-xl t-elevated border text-rose-600 font-bold flex items-center justify-center gap-2">
+              <i class="fa-solid fa-rotate-left"></i>
+              <span>Reset to Default "Genius" Demo Database</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Confirmation Dialog Modal (Replaces native confirm()) -->
+    <div id="confirmDialogModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="t-surface border w-full max-w-sm rounded-2xl p-4 space-y-3 shadow-2xl">
+        <h4 id="confirmDialogTitle" class="text-base font-extrabold">Confirm Action</h4>
+        <p id="confirmDialogMessage" class="text-xs t-text-secondary leading-relaxed"></p>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button onclick="closeModal('confirmDialogModal')" class="min-h-[40px] px-4 py-2 rounded-xl t-elevated border font-bold text-xs">
+            Cancel
+          </button>
+          <button id="confirmDialogActionBtn" class="min-h-[40px] px-4 py-2 rounded-xl bg-rose-600 text-white font-bold text-xs">
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL 6: PDF / PRINTABLE ENGINEERING REPORT PREVIEW MODAL
+         ====================================================================== -->
+    <div id="reportPreviewModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
+      <div class="t-surface border w-full max-w-4xl rounded-2xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-4 py-3 border-b t-border flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-file-pdf text-rose-600 text-lg"></i>
+            <div>
+              <h3 class="text-sm sm:text-base font-extrabold">Engineering Report Preview (PDF / Print)</h3>
+              <p class="text-[11px] t-text-muted">Tap "Print / Save as PDF" to save an official PDF report on your phone or desktop.</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="triggerBrowserPrint()" class="min-h-[40px] px-4 py-2 rounded-xl t-btn-primary font-bold text-xs flex items-center gap-2">
+              <i class="fa-solid fa-print"></i>
+              <span>Print / Save as PDF</span>
+            </button>
+            <button onclick="closeModal('reportPreviewModal')" class="w-9 h-9 rounded-full t-elevated flex items-center justify-center">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+        <div id="reportPreviewScrollBody" class="p-4 sm:p-6 overflow-y-auto bg-white text-slate-900 text-xs space-y-4">
+          <!-- Populated dynamically and mirrored into #printReportContainer -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-16 right-3 z-50 space-y-2 max-w-xs w-full pointer-events-none"></div>
+
+  </div>
+
+  <!-- ========================================================================
+       DEDICATED PRINT / PDF CONTAINER (Visible only during Print / Save to PDF)
+       ======================================================================== -->
+  <div id="printReportContainer" class="hidden p-6"></div>
+
+  <!-- ========================================================================
+       APPLICATION JAVASCRIPT
+       ======================================================================== -->
+  <script>
+    /* ========================================================================
+       1. CONSTANTS, STORAGE KEYS & INITIAL "GENIUS" SYSTEM SEED DATA
+       ======================================================================== */
+    const STORAGE_KEY_DB = 'GCL_DATABASE_V2';
+    const STORAGE_KEY_THEME = 'GCL_THEME_V2';
+    const STORAGE_KEY_OPERATOR = 'GCL_OPERATOR_V2';
+    const MAX_LRUS_PER_SYSTEM = 30;
+    const MAX_SRUS_PER_LRU = 30;
+    const MAX_FIELDS_PER_MODULE = 10;
+
+    function uid(prefix = 'id') {
+      return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 7)}`;
+    }
+
+    function nowIsoLocal(offsetMinutes = 0) {
+      const d = new Date(Date.now() - offsetMinutes * 60000);
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function formatDisplayDate(isoStr) {
+      if (!isoStr) return '—';
+      try {
+        const d = new Date(isoStr);
+        if (isNaN(d.getTime())) return isoStr;
+        return d.toLocaleString([], {
+          year: 'numeric',
+          month: 'short',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (e) {
+        return isoStr;
+      }
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    /**
+     * Builds the default "Genius" configuration & log database matching the user's specification:
+     * System Name: Genius
+     * LRU list: CSPU, RFSU1, RFSU2
+     * SRU list for CSPU: sp, exc, sbc
+     * SRU list for RFSU1: sp, lexc, lsbc
+     * SRU list for RFSU2: lexc, sbc2, pdc
+     */
+    function createDefaultDatabase() {
+      const sysGeniusId = 'sys_genius_01';
+      const sysGenius2Id = 'sys_genius_02';
+
+      return {
+        app: 'Genius Configuration and Log (GCL)',
+        schemaVersion: '2.4',
+        lastUpdated: new Date().toISOString(),
+        systems: [
+          {
+            id: sysGeniusId,
+            name: 'Genius',
+            createdAt: nowIsoLocal(10080),
+            lrus: [
+              {
+                id: 'lru_cspu',
+                name: 'CSPU',
+                serialNumber: 'SN-CSPU-4401',
+                fields: [
+                  { id: 'f_cspu_1', name: 'HW Rev', value: 'Rev C.2' },
+                  { id: 'f_cspu_2', name: 'System FW', value: 'v4.12.0-release' },
+                  { id: 'f_cspu_3', name: 'Backplane CPLD', value: '0x1A04' }
+                ],
+                srus: [
+                  {
+                    id: 'sru_cspu_sp',
+                    name: 'sp',
+                    serialNumber: 'SN-SP-88101',
+                    fields: [
+                      { id: 'f_cspu_sp_1', name: 'PCB HW Ver', value: 'B1.4' },
+                      { id: 'f_cspu_sp_2', name: 'DSP Image', value: 'v2.9.4' },
+                      { id: 'f_cspu_sp_3', name: 'FPGA Bitstream', value: '2026.02.11_r4' }
+                    ]
+                  },
+                  {
+                    id: 'sru_cspu_exc',
+                    name: 'exc',
+                    serialNumber: 'SN-EXC-55019',
+                    fields: [
+                      { id: 'f_cspu_exc_1', name: 'HW Rev', value: 'A3.0' },
+                      { id: 'f_cspu_exc_2', name: 'Synth FW', value: 'v1.8.2' }
+                    ]
+                  },
+                  {
+                    id: 'sru_cspu_sbc',
+                    name: 'sbc',
+                    serialNumber: 'SN-SBC-31009',
+                    fields: [
+                      { id: 'f_cspu_sbc_1', name: 'Board Rev', value: 'D1.1' },
+                      { id: 'f_cspu_sbc_2', name: 'Linux Kernel', value: '6.1.42-rt13' },
+                      { id: 'f_cspu_sbc_3', name: 'App SW Version', value: 'GCL-Core-5.4.1' }
+                    ]
+                  }
+                ]
+              },
+              {
+                id: 'lru_rfsu1',
+                name: 'RFSU1',
+                serialNumber: 'SN-RFSU1-7101',
+                fields: [
+                  { id: 'f_rfsu1_1', name: 'Chassis HW', value: 'Rev B.1' },
+                  { id: 'f_rfsu1_2', name: 'Controller SW', value: 'v3.04.8' }
+                ],
+                srus: [
+                  {
+                    id: 'sru_rfsu1_sp',
+                    name: 'sp',
+                    serialNumber: 'SN-SP-88109',
+                    fields: [
+                      { id: 'f_rfsu1_sp_1', name: 'PCB HW Ver', value: 'B1.4' },
+                      { id: 'f_rfsu1_sp_2', name: 'DSP Image', value: 'v2.9.4' }
+                    ]
+                  },
+                  {
+                    id: 'sru_rfsu1_lexc',
+                    name: 'lexc',
+                    serialNumber: 'SN-LEXC-62041',
+                    fields: [
+                      { id: 'f_rfsu1_lexc_1', name: 'RF HW Rev', value: 'C2.0' },
+                      { id: 'f_rfsu1_lexc_2', name: 'LO Cal Table', value: 'CAL-2026-Q1' }
+                    ]
+                  },
+                  {
+                    id: 'sru_rfsu1_lsbc',
+                    name: 'lsbc',
+                    serialNumber: 'SN-LSBC-19022',
+                    fields: [
+                      { id: 'f_rfsu1_lsbc_1', name: 'HW Rev', value: 'B2.1' },
+                      { id: 'f_rfsu1_lsbc_2', name: 'Bootloader', value: 'U-Boot 2025.04' },
+                      { id: 'f_rfsu1_lsbc_3', name: 'Control SW', value: 'v3.2.0' }
+                    ]
+                  }
+                ]
+              },
+              {
+                id: 'lru_rfsu2',
+                name: 'RFSU2',
+                serialNumber: 'SN-RFSU2-7102',
+                fields: [
+                  { id: 'f_rfsu2_1', name: 'Chassis HW', value: 'Rev B.1' },
+                  { id: 'f_rfsu2_2', name: 'Controller SW', value: 'v3.04.8' }
+                ],
+                srus: [
+                  {
+                    id: 'sru_rfsu2_lexc',
+                    name: 'lexc',
+                    serialNumber: 'SN-LEXC-62088',
+                    fields: [
+                      { id: 'f_rfsu2_lexc_1', name: 'RF HW Rev', value: 'C2.1' },
+                      { id: 'f_rfsu2_lexc_2', name: 'LO Cal Table', value: 'CAL-2026-Q2' }
+                    ]
+                  },
+                  {
+                    id: 'sru_rfsu2_sbc2',
+                    name: 'sbc2',
+                    serialNumber: 'SN-SBC2-49015',
+                    fields: [
+                      { id: 'f_rfsu2_sbc2_1', name: 'HW Rev', value: 'A4.2' },
+                      { id: 'f_rfsu2_sbc2_2', name: 'Node SW Build', value: 'v3.2.1-rc2' }
+                    ]
+                  },
+                  {
+                    id: 'sru_rfsu2_pdc',
+                    name: 'pdc',
+                    serialNumber: 'SN-PDC-90312',
+                    fields: [
+                      { id: 'f_rfsu2_pdc_1', name: 'Power Board HW', value: 'Rev E.0' },
+                      { id: 'f_rfsu2_pdc_2', name: 'PMIC Firmware', value: 'v1.14' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            id: sysGenius2Id,
+            name: 'Genius-Lab-02',
+            createdAt: nowIsoLocal(4320),
+            lrus: [
+              {
+                id: 'lru_g2_cspu',
+                name: 'CSPU',
+                serialNumber: 'SN-CSPU-4409',
+                fields: [
+                  { id: 'f_g2_cspu_1', name: 'HW Rev', value: 'Rev C.2' },
+                  { id: 'f_g2_cspu_2', name: 'System FW', value: 'v4.13.0-beta' }
+                ],
+                srus: [
+                  {
+                    id: 'sru_g2_cspu_sp',
+                    name: 'sp',
+                    serialNumber: 'SN-SP-88210',
+                    fields: [
+                      { id: 'f_g2_sp_1', name: 'PCB HW Ver', value: 'B1.4' },
+                      { id: 'f_g2_sp_2', name: 'DSP Image', value: 'v3.0.0-rc1' }
+                    ]
+                  },
+                  {
+                    id: 'sru_g2_cspu_sbc',
+                    name: 'sbc',
+                    serialNumber: 'SN-SBC-31104',
+                    fields: [
+                      { id: 'f_g2_sbc_1', name: 'Board Rev', value: 'D1.2' },
+                      { id: 'f_g2_sbc_2', name: 'App SW Version', value: 'GCL-Core-5.5.0' }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        malfunctions: [
+          {
+            id: 'malf_01',
+            systemId: sysGeniusId,
+            systemName: 'Genius',
+            lruId: 'lru_rfsu1',
+            lruName: 'RFSU1',
+            sruId: 'sru_rfsu1_lexc',
+            sruName: 'lexc',
+            username: 'Alex.K',
+            status: 'Open',
+            occurredAt: nowIsoLocal(195),
+            resolvedAt: '',
+            description: 'Local oscillator PLL unlock alarm triggered at high band (14.2 GHz). Phase noise degraded by 8 dBc/Hz during thermal stress test.',
+            resolution: ''
+          },
+          {
+            id: 'malf_02',
+            systemId: sysGeniusId,
+            systemName: 'Genius',
+            lruId: 'lru_cspu',
+            lruName: 'CSPU',
+            sruId: '',
+            sruName: '',
+            username: 'Dana.M',
+            status: 'In Progress',
+            occurredAt: nowIsoLocal(640),
+            resolvedAt: '',
+            description: 'Intermittent packet drop observed on CSPU high-speed backplane bus. Isolating whether fault originates in sp or sbc SRU.',
+            resolution: 'Captured eye diagram on backplane lanes 0-3; running BERT diagnostic overnight before assigning specific faulty SRU.'
+          },
+          {
+            id: 'malf_03',
+            systemId: sysGeniusId,
+            systemName: 'Genius',
+            lruId: 'lru_rfsu2',
+            lruName: 'RFSU2',
+            sruId: 'sru_rfsu2_pdc',
+            sruName: 'pdc',
+            username: 'Eli.R',
+            status: 'Closed',
+            occurredAt: nowIsoLocal(2880),
+            resolvedAt: nowIsoLocal(2610),
+            description: '+5.0V rail under-voltage warning reported on RFSU2 startup under cold soak (-20C).',
+            resolution: 'Replaced pdc module (Old S/N: SN-PDC-90104 -> New S/N: SN-PDC-90312) and updated PMIC Firmware to v1.14 with soft-start ramp patch.'
+          }
+        ],
+        history: [
+          {
+            id: 'hist_01',
+            timestamp: nowIsoLocal(195),
+            username: 'Alex.K',
+            category: 'FAULT_CREATED',
+            systemName: 'Genius',
+            lruName: 'RFSU1',
+            sruName: 'lexc',
+            summary: 'Logged Open malfunction on Genius / RFSU1 / lexc',
+            details: 'Description: "Local oscillator PLL unlock alarm triggered at high band (14.2 GHz)..."'
+          },
+          {
+            id: 'hist_02',
+            timestamp: nowIsoLocal(640),
+            username: 'Dana.M',
+            category: 'FAULT_CREATED',
+            systemName: 'Genius',
+            lruName: 'CSPU',
+            sruName: '(LRU-Level / TBD)',
+            summary: 'Logged In Progress malfunction on Genius / CSPU (SRU TBD)',
+            details: 'Description: "Intermittent packet drop observed on CSPU high-speed backplane bus..."'
+          },
+          {
+            id: 'hist_03',
+            timestamp: nowIsoLocal(2615),
+            username: 'Eli.R',
+            category: 'SN_REPLACE',
+            systemName: 'Genius',
+            lruName: 'RFSU2',
+            sruName: 'pdc',
+            summary: 'Replaced Serial Number on RFSU2 / pdc',
+            details: 'Serial Number: "SN-PDC-90104" → "SN-PDC-90312" | Note: Cold soak +5V rail fix'
+          },
+          {
+            id: 'hist_04',
+            timestamp: nowIsoLocal(2612),
+            username: 'Eli.R',
+            category: 'VERSION_UPDATE',
+            systemName: 'Genius',
+            lruName: 'RFSU2',
+            sruName: 'pdc',
+            summary: 'Updated HW/SW field "PMIC Firmware" on RFSU2 / pdc',
+            details: 'PMIC Firmware: "v1.11" → "v1.14"'
+          },
+          {
+            id: 'hist_05',
+            timestamp: nowIsoLocal(2610),
+            username: 'Eli.R',
+            category: 'FAULT_UPDATED',
+            systemName: 'Genius',
+            lruName: 'RFSU2',
+            sruName: 'pdc',
+            summary: 'Resolved & Closed malfunction on Genius / RFSU2 / pdc',
+            details: 'Status: "In Progress" → "Closed" | Added Resolution details'
+          }
+        ]
+      };
+    }
+
+    /* ========================================================================
+       2. APPLICATION STATE
+       ======================================================================== */
+    let db = null;
+    const state = {
+      activeTab: 'status',            // 'status' | 'logs' | 'setup' | 'history'
+      theme: 'light',                 // 'light' | 'greyscale' | 'dark'
+      activeOperator: 'Alex.K',
+      selectedSystemId: '',           // Active system in Status tab
+      setupSystemId: '',              // Active system in Setup tab
+      showHwSwVersions: false,        // Toggle button state in System Status tab
+      setupLocked: true,              // Safety lock in System Setup tab (Default: Locked)
+      expandedLruIds: new Set(),      // Track which LRU cards are expanded in Status tab
+      logFilters: {
+        system: 'ALL',
+        lru: 'ALL',
+        sru: 'ALL',
+        username: '',
+        status: 'ALL'
+      }
+    };
+
+    /* ========================================================================
+       3. INITIALIZATION & LOCAL STORAGE SYNC
+       ======================================================================== */
+    function initApp() {
+      // Load saved theme (default: light)
+      const savedTheme = localStorage.getItem(STORAGE_KEY_THEME) || 'light';
+      setTheme(savedTheme, false);
+
+      // Load saved operator username
+      const savedOperator = localStorage.getItem(STORAGE_KEY_OPERATOR);
+      if (savedOperator && savedOperator.trim()) {
+        state.activeOperator = savedOperator.trim();
+      }
+      document.getElementById('headerOperatorName').textContent = state.activeOperator;
+
+      // Load database from localStorage or initialize default "Genius" database
+      const rawDb = localStorage.getItem(STORAGE_KEY_DB);
+      if (rawDb) {
+        try {
+          const parsed = JSON.parse(rawDb);
+          if (parsed && Array.isArray(parsed.systems)) {
+            db = parsed;
+          }
+        } catch (err) {
+          console.error('Failed to parse stored DB, using default:', err);
+        }
+      }
+      if (!db) {
+        db = createDefaultDatabase();
+        persistDb();
+      }
+
+      // Set initial selected systems
+      if (db.systems.length > 0) {
+        state.selectedSystemId = db.systems[0].id;
+        state.setupSystemId = db.systems[0].id;
+        // Expand all LRUs of first system by default
+        db.systems[0].lrus.forEach(l => state.expandedLruIds.add(l.id));
+      }
+
+      // Close Global Find overlay when clicking outside
+      document.addEventListener('click', (e) => {
+        const overlay = document.getElementById('globalSearchOverlay');
+        const input = document.getElementById('globalSearchInput');
+        if (!overlay.contains(e.target) && e.target !== input) {
+          overlay.classList.add('hidden');
+        }
+      });
+
+      refreshAllViews();
+      switchTab('status');
+    }
+
+    function persistDb() {
+      db.lastUpdated = new Date().toISOString();
+      try {
+        localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(db));
+      } catch (e) {
+        console.error('Storage quota warning:', e);
+      }
+      updateKnownOperatorDatalist();
+      updateFaultBadges();
+    }
+
+    function addHistoryRecord({ category, systemName, lruName = '', sruName = '', summary, details = '', username = '' }) {
+      const user = (username || state.activeOperator || 'Operator').trim();
+      db.history.unshift({
+        id: uid('hist'),
+        timestamp: nowIsoLocal(0),
+        username: user,
+        category,
+        systemName: systemName || '—',
+        lruName: lruName || '',
+        sruName: sruName || '',
+        summary,
+        details
+      });
+      persistDb();
+    }
+
+    /* ========================================================================
+       4. THEME SWITCHER (LIGHT / GREYSCALE / DARK)
+       ======================================================================== */
+    function setTheme(themeName, notify = true) {
+      const valid = ['light', 'greyscale', 'dark'];
+      const chosen = valid.includes(themeName) ? themeName : 'light';
+      state.theme = chosen;
+      document.documentElement.setAttribute('data-theme', chosen);
+      localStorage.setItem(STORAGE_KEY_THEME, chosen);
+
+      valid.forEach(t => {
+        const btn = document.getElementById(`themeBtn-${t}`);
+        if (!btn) return;
+        if (t === chosen) {
+          btn.className = 'min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition t-btn-primary shadow-xs';
+        } else {
+          btn.className = 'min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition t-text-secondary hover:opacity-80';
+        }
+      });
+
+      if (notify) {
+        const label = chosen === 'light' ? 'Light (Default)' : chosen === 'greyscale' ? 'High-Contrast Greyscale' : 'Dark Lab';
+        showToast(`Theme switched to ${label}`, 'info');
+      }
+    }
+
+    /* ========================================================================
+       5. NAVIGATION TABS & HEADER BADGES
+       ======================================================================== */
+    function switchTab(tabId) {
+      state.activeTab = tabId;
+      const tabs = ['status', 'logs', 'setup', 'history'];
+
+      tabs.forEach(t => {
+        const sec = document.getElementById(`view-${t}`);
+        if (sec) sec.classList.toggle('hidden', t !== tabId);
+
+        // Desktop tab highlight
+        const dBtn = document.getElementById(`desktopTab-${t}`);
+        if (dBtn) {
+          if (t === tabId) {
+            dBtn.className = 'px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition t-btn-primary shadow-xs';
+          } else {
+            dBtn.className = 'px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition t-text-secondary hover:opacity-80';
+          }
+        }
+
+        // Mobile bottom nav highlight
+        const mBtn = document.getElementById(`mobileTab-${t}`);
+        if (mBtn) {
+          if (t === tabId) {
+            mBtn.className = 'relative flex-1 py-2 rounded-xl flex flex-col items-center justify-center gap-0.5 text-[11px] font-extrabold transition t-btn-soft';
+          } else {
+            mBtn.className = 'relative flex-1 py-2 rounded-xl flex flex-col items-center justify-center gap-0.5 text-[11px] font-semibold transition t-text-muted';
+          }
+        }
+      });
+
+      if (tabId === 'status') renderSystemStatusView();
+      if (tabId === 'logs') renderMalfunctionsView();
+      if (tabId === 'setup') renderSystemSetupView();
+      if (tabId === 'history') renderHistoryView();
+    }
+
+    function refreshAllViews() {
+      updateKnownOperatorDatalist();
+      updateFaultBadges();
+      renderSystemStatusView();
+      populateLogFilterDropdowns();
+      renderMalfunctionsView();
+      renderSystemSetupView();
+      populateHistorySystemFilter();
+      renderHistoryView();
+    }
+
+    function updateFaultBadges() {
+      const openOrProgCount = db.malfunctions.filter(m => m.status !== 'Closed').length;
+      const dBadge = document.getElementById('desktopOpenFaultBadge');
+      const mBadge = document.getElementById('mobileOpenFaultBadge');
+      if (dBadge) {
+        dBadge.textContent = openOrProgCount;
+        dBadge.classList.toggle('hidden', openOrProgCount === 0);
+      }
+      if (mBadge) {
+        mBadge.textContent = openOrProgCount;
+        mBadge.classList.toggle('hidden', openOrProgCount === 0);
+      }
+    }
+
+    function updateKnownOperatorDatalist() {
+      const operators = new Set([state.activeOperator, 'Alex.K', 'Dana.M', 'Eli.R', 'Maya.S']);
+      db.malfunctions.forEach(m => { if (m.username) operators.add(m.username); });
+      db.history.forEach(h => { if (h.username) operators.add(h.username); });
+
+      const dl = document.getElementById('operatorSuggestionsList');
+      if (dl) {
+        dl.innerHTML = Array.from(operators)
+          .filter(Boolean)
+          .map(u => `<option value="${escapeHtml(u)}"></option>`)
+          .join('');
+      }
+    }
+
+    /* ========================================================================
+       6. TAB 1: SYSTEM STATUS (OPERATIONAL CONFIGURATION VIEW)
+       ======================================================================== */
+    function handleSelectStatusSystem(systemId) {
+      state.selectedSystemId = systemId;
+      const sys = db.systems.find(s => s.id === systemId);
+      if (sys) {
+        sys.lrus.forEach(l => state.expandedLruIds.add(l.id));
+      }
+      renderSystemStatusView();
+    }
+
+    function toggleShowHwSwVersions() {
+      state.showHwSwVersions = !state.showHwSwVersions;
+      renderSystemStatusView();
+    }
+
+    function expandAllStatusLrus(expand) {
+      const sys = db.systems.find(s => s.id === state.selectedSystemId);
+      if (!sys) return;
+      if (expand) {
+        sys.lrus.forEach(l => state.expandedLruIds.add(l.id));
+      } else {
+        state.expandedLruIds.clear();
+      }
+      renderSystemStatusView();
+    }
+
+    function toggleLruExpand(lruId) {
+      if (state.expandedLruIds.has(lruId)) {
+        state.expandedLruIds.delete(lruId);
+      } else {
+        state.expandedLruIds.add(lruId);
+      }
+      renderSystemStatusView();
+    }
+
+    function renderSystemStatusView() {
+      const selectEl = document.getElementById('statusSystemSelect');
+      const container = document.getElementById('systemStatusTreeContainer');
+      const summaryEl = document.getElementById('statusSystemSummaryPills');
+      const toggleBtn = document.getElementById('toggleHwSwBtn');
+      const toggleBtnText = document.getElementById('toggleHwSwBtnText');
+
+      if (!db.systems.length) {
+        selectEl.innerHTML = '<option value="">No Systems Configured</option>';
+        summaryEl.innerHTML = '';
+        container.innerHTML = `
+          <div class="t-surface border rounded-2xl p-8 text-center space-y-3">
+            <i class="fa-solid fa-sitemap text-3xl t-text-muted"></i>
+            <h3 class="font-bold text-base">No Electronic Systems Defined</h3>
+            <p class="text-xs t-text-muted max-w-md mx-auto">Open the <strong>System Setup</strong> tab, unlock setup, and build your first system architecture.</p>
+            <button onclick="switchTab('setup')" class="min-h-[44px] px-4 py-2 rounded-xl t-btn-primary font-bold text-xs">Go to System Setup</button>
+          </div>`;
+        return;
+      }
+
+      if (!db.systems.some(s => s.id === state.selectedSystemId)) {
+        state.selectedSystemId = db.systems[0].id;
+      }
+
+      selectEl.innerHTML = db.systems.map(sys =>
+        `<option value="${escapeHtml(sys.id)}" ${sys.id === state.selectedSystemId ? 'selected' : ''}>${escapeHtml(sys.name)} (${sys.lrus.length} LRUs)</option>`
+      ).join('');
+
+      // Update Show/Hide HW/SW Versions Toggle Button visual state
+      if (state.showHwSwVersions) {
+        toggleBtn.className = 'min-h-[44px] flex-1 sm:flex-initial px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border transition t-btn-primary shadow-sm';
+        toggleBtnText.textContent = 'Hide HW/SW Versions';
+      } else {
+        toggleBtn.className = 'min-h-[44px] flex-1 sm:flex-initial px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border transition t-btn-soft';
+        toggleBtnText.textContent = 'Show HW/SW Versions';
+      }
+
+      const activeSys = db.systems.find(s => s.id === state.selectedSystemId);
+      const totalLrus = activeSys.lrus.length;
+      const totalSrus = activeSys.lrus.reduce((acc, l) => acc + l.srus.length, 0);
+      const sysFaults = db.malfunctions.filter(m => m.systemId === activeSys.id && m.status !== 'Closed');
+
+      summaryEl.innerHTML = `
+        <span class="px-2.5 py-1 rounded-lg badge-lru font-bold">${totalLrus} LRUs</span>
+        <span class="px-2.5 py-1 rounded-lg badge-sru font-bold">${totalSrus} SRUs</span>
+        ${sysFaults.length > 0
+          ? `<button onclick="filterLogsByTarget('${escapeHtml(activeSys.id)}', 'ALL', 'ALL')" class="px-2.5 py-1 rounded-lg badge-open font-bold flex items-center gap-1">
+               <i class="fa-solid fa-triangle-exclamation"></i>
+               <span>${sysFaults.length} Active Fault${sysFaults.length > 1 ? 's' : ''}</span>
+             </button>`
+          : `<span class="px-2.5 py-1 rounded-lg badge-closed font-bold flex items-center gap-1">
+               <i class="fa-solid fa-circle-check"></i>
+               <span>Nominal</span>
+             </span>`
+        }
+      `;
+
+      if (activeSys.lrus.length === 0) {
+        container.innerHTML = `
+          <div class="t-surface border rounded-2xl p-6 text-center space-y-2">
+            <p class="text-sm font-bold">System "${escapeHtml(activeSys.name)}" has no LRUs yet.</p>
+            <button onclick="switchTab('setup')" class="min-h-[40px] px-4 py-2 rounded-xl t-btn-soft text-xs font-bold">Add LRUs in System Setup</button>
+          </div>`;
+        return;
+      }
+
+      // Render Each LRU Card & Nested SRU Tree
+      container.innerHTML = activeSys.lrus.map((lru) => {
+        const isExpanded = state.expandedLruIds.has(lru.id);
+        const lruFaults = db.malfunctions.filter(m => m.systemId === activeSys.id && m.lruId === lru.id && m.status !== 'Closed');
+
+        return `
+          <div id="status-card-${escapeHtml(lru.id)}" class="t-surface border rounded-2xl overflow-hidden transition">
+            <!-- LRU Header Row -->
+            <div class="p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 t-elevated border-b t-border">
+              <div class="flex items-start sm:items-center gap-3 cursor-pointer select-none flex-1" onclick="toggleLruExpand('${escapeHtml(lru.id)}')">
+                <button type="button" class="w-8 h-8 rounded-lg t-surface border flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+                  <i class="fa-solid fa-chevron-${isExpanded ? 'down' : 'right'} text-xs"></i>
+                </button>
+                <div class="space-y-1 flex-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded badge-lru">LRU</span>
+                    <h3 class="text-base font-extrabold tracking-tight">${escapeHtml(lru.name)}</h3>
+                    <span class="font-mono-code text-xs font-semibold px-2.5 py-0.5 rounded-md t-surface border">
+                      S/N: ${lru.serialNumber ? escapeHtml(lru.serialNumber) : '<em class="t-text-muted">Not Set</em>'}
+                    </span>
+                    <span class="text-xs t-text-muted font-medium">(${lru.srus.length} SRU${lru.srus.length === 1 ? '' : 's'})</span>
+                    ${lruFaults.length > 0 ? `
+                      <span onclick="event.stopPropagation(); filterLogsByTarget('${escapeHtml(activeSys.id)}', '${escapeHtml(lru.name)}', 'ALL')" class="text-[11px] font-bold px-2 py-0.5 rounded-full badge-open cursor-pointer">
+                        <i class="fa-solid fa-bolt mr-1"></i>${lruFaults.length} Fault${lruFaults.length > 1 ? 's' : ''}
+                      </span>
+                    ` : ''}
+                  </div>
+
+                  <!-- LRU HW/SW Version Badges (Visible when "Show HW/SW Versions" is active) -->
+                  ${state.showHwSwVersions ? renderHwSwFieldsPills(lru.fields, 'LRU') : ''}
+                </div>
+              </div>
+
+              <!-- LRU Operational Action Buttons -->
+              <div class="flex items-center gap-1.5 self-end sm:self-center shrink-0">
+                <button
+                  onclick="openOperationalUpdateModal('${escapeHtml(activeSys.id)}', '${escapeHtml(lru.id)}', '')"
+                  class="min-h-[40px] px-3 py-1.5 rounded-xl t-surface border text-xs font-bold flex items-center gap-1.5 hover:opacity-80 transition"
+                  title="Update LRU Serial Number or HW/SW Versions"
+                >
+                  <i class="fa-solid fa-pen-to-square text-blue-500"></i>
+                  <span>Update S/N &amp; Ver</span>
+                </button>
+                <button
+                  onclick="openMalfunctionModalForTarget('${escapeHtml(activeSys.id)}', '${escapeHtml(lru.id)}', '')"
+                  class="min-h-[40px] px-2.5 py-1.5 rounded-xl t-btn-soft text-xs font-bold flex items-center gap-1 hover:opacity-80 transition"
+                  title="Log Malfunction on this LRU"
+                >
+                  <i class="fa-solid fa-plus"></i>
+                  <span>Fault</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Nested SRU Tree List -->
+            <div class="${isExpanded ? 'block' : 'hidden'} p-3.5 sm:p-4">
+              ${lru.srus.length === 0 ? `
+                <p class="text-xs t-text-muted italic pl-2">No SRUs configured under ${escapeHtml(lru.name)}.</p>
+              ` : `
+                <div class="tree-branch space-y-2.5">
+                  ${lru.srus.map(sru => {
+                    const sruFaults = db.malfunctions.filter(
+                      m => m.systemId === activeSys.id && m.lruId === lru.id && m.sruId === sru.id && m.status !== 'Closed'
+                    );
+                    return `
+                      <div id="status-card-${escapeHtml(sru.id)}" class="tree-node t-elevated border rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition">
+                        <div class="space-y-1.5 flex-1">
+                          <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded badge-sru">SRU</span>
+                            <span class="font-bold text-sm">${escapeHtml(sru.name)}</span>
+                            <span class="font-mono-code text-xs font-semibold px-2 py-0.5 rounded t-surface border">
+                              S/N: ${sru.serialNumber ? escapeHtml(sru.serialNumber) : '<em class="t-text-muted">Not Set</em>'}
+                            </span>
+                            ${sruFaults.length > 0 ? `
+                              <button onclick="filterLogsByTarget('${escapeHtml(activeSys.id)}', '${escapeHtml(lru.name)}', '${escapeHtml(sru.name)}')" class="text-[11px] font-bold px-2 py-0.5 rounded-full badge-open">
+                                <i class="fa-solid fa-triangle-exclamation mr-1"></i>${sruFaults.length} Open/In-Prog
+                              </button>
+                            ` : ''}
+                          </div>
+
+                          <!-- SRU HW/SW Version Badges (Visible when "Show HW/SW Versions" is active) -->
+                          ${state.showHwSwVersions ? renderHwSwFieldsPills(sru.fields, 'SRU') : ''}
+                        </div>
+
+                        <div class="flex items-center gap-1.5 self-end sm:self-center shrink-0">
+                          <button
+                            onclick="openOperationalUpdateModal('${escapeHtml(activeSys.id)}', '${escapeHtml(lru.id)}', '${escapeHtml(sru.id)}')"
+                            class="min-h-[38px] px-2.5 py-1 rounded-lg t-surface border text-xs font-semibold flex items-center gap-1.5 hover:opacity-80"
+                          >
+                            <i class="fa-solid fa-pen-to-square text-blue-500"></i>
+                            <span>Update S/N &amp; Ver</span>
+                          </button>
+                          <button
+                            onclick="openMalfunctionModalForTarget('${escapeHtml(activeSys.id)}', '${escapeHtml(lru.id)}', '${escapeHtml(sru.id)}')"
+                            class="min-h-[38px] px-2.5 py-1 rounded-lg t-btn-soft text-xs font-semibold flex items-center gap-1 hover:opacity-80"
+                          >
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Fault</span>
+                          </button>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderHwSwFieldsPills(fields, levelLabel) {
+      if (!fields || fields.length === 0) {
+        return `<div class="text-[11px] t-text-muted italic pt-1">No custom HW/SW version fields configured for this ${levelLabel}.</div>`;
+      }
+      return `
+        <div class="pt-1.5 flex flex-wrap items-center gap-1.5">
+          ${fields.map(f => `
+            <div class="inline-flex items-center rounded-lg overflow-hidden border t-border text-xs">
+              <span class="px-2 py-0.5 t-muted-bg font-semibold t-text-secondary">${escapeHtml(f.name)}</span>
+              <span class="px-2 py-0.5 t-surface font-mono-code font-bold">${f.value ? escapeHtml(f.value) : '—'}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    /* ========================================================================
+       7. OPERATIONAL SERIAL NUMBER & HW/SW VERSION REPLACEMENT MODAL
+       ======================================================================== */
+    function openOperationalUpdateModal(systemId, lruId, sruId = '') {
+      const sys = db.systems.find(s => s.id === systemId);
+      if (!sys) return;
+      const lru = sys.lrus.find(l => l.id === lruId);
+      if (!lru) return;
+      const sru = sruId ? lru.srus.find(s => s.id === sruId) : null;
+      const target = sru || lru;
+
+      document.getElementById('opUpdateSystemId').value = systemId;
+      document.getElementById('opUpdateLruId').value = lruId;
+      document.getElementById('opUpdateSruId').value = sruId || '';
+      document.getElementById('opUpdateUsername').value = state.activeOperator;
+      document.getElementById('opUpdateSerialNumber').value = target.serialNumber || '';
+      document.getElementById('opUpdateNote').value = '';
+
+      const badge = document.getElementById('opUpdateTypeBadge');
+      const title = document.getElementById('opUpdateTitle');
+      if (sru) {
+        badge.textContent = 'SRU MODULE';
+        badge.className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded badge-sru';
+        title.textContent = `${sys.name} → ${lru.name} → ${sru.name}`;
+      } else {
+        badge.textContent = 'LRU MODULE';
+        badge.className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded badge-lru';
+        title.textContent = `${sys.name} → ${lru.name}`;
+      }
+
+      const fieldsContainer = document.getElementById('opUpdateCustomFieldsContainer');
+      const countLabel = document.getElementById('opUpdateFieldsCount');
+      const fields = target.fields || [];
+      countLabel.textContent = `${fields.length} / ${MAX_FIELDS_PER_MODULE} fields`;
+
+      if (fields.length === 0) {
+        fieldsContainer.innerHTML = `<p class="text-xs t-text-muted italic p-2 rounded-lg t-elevated">No custom HW/SW version fields defined for this module.</p>`;
+      } else {
+        fieldsContainer.innerHTML = fields.map((f, idx) => `
+          <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 p-2.5 rounded-xl t-elevated border">
+            <label class="text-xs font-bold sm:w-2/5 shrink-0">${escapeHtml(f.name)}</label>
+            <input
+              type="text"
+              data-field-index="${idx}"
+              value="${escapeHtml(f.value || '')}"
+              class="op-custom-field-input gcl-input font-mono-code text-xs py-1.5 min-h-[38px]"
+              placeholder="Enter version..."
+            />
+          </div>
+        `).join('');
+      }
+
+      openModal('operationalUpdateModal');
+    }
+
+    function submitOperationalUpdate(e) {
+      e.preventDefault();
+      const systemId = document.getElementById('opUpdateSystemId').value;
+      const lruId = document.getElementById('opUpdateLruId').value;
+      const sruId = document.getElementById('opUpdateSruId').value;
+      const username = document.getElementById('opUpdateUsername').value.trim() || state.activeOperator;
+      const newSn = document.getElementById('opUpdateSerialNumber').value.trim();
+      const note = document.getElementById('opUpdateNote').value.trim();
+
+      setActiveOperatorInternal(username);
+
+      const sys = db.systems.find(s => s.id === systemId);
+      if (!sys) return;
+      const lru = sys.lrus.find(l => l.id === lruId);
+      if (!lru) return;
+      const sru = sruId ? lru.srus.find(s => s.id === sruId) : null;
+      const target = sru || lru;
+      const pathLabel = sru ? `${lru.name} / ${sru.name}` : lru.name;
+
+      let changesCount = 0;
+
+      // 1. Check Serial Number diff
+      const oldSn = (target.serialNumber || '').trim();
+      if (oldSn !== newSn) {
+        target.serialNumber = newSn;
+        changesCount++;
+        addHistoryRecord({
+          category: 'SN_REPLACE',
+          username,
+          systemName: sys.name,
+          lruName: lru.name,
+          sruName: sru ? sru.name : '',
+          summary: `Updated Serial Number on ${pathLabel}`,
+          details: `Serial Number: "${oldSn || '(empty)'}" → "${newSn || '(empty)'}"${note ? ` | Note: ${note}` : ''}`
+        });
+      }
+
+      // 2. Check Custom HW/SW Version Field diffs
+      const fieldInputs = document.querySelectorAll('.op-custom-field-input');
+      fieldInputs.forEach(input => {
+        const idx = Number(input.getAttribute('data-field-index'));
+        const fieldObj = target.fields[idx];
+        if (!fieldObj) return;
+        const oldVal = (fieldObj.value || '').trim();
+        const newVal = input.value.trim();
+        if (oldVal !== newVal) {
+          fieldObj.value = newVal;
+          changesCount++;
+          addHistoryRecord({
+            category: 'VERSION_UPDATE',
+            username,
+            systemName: sys.name,
+            lruName: lru.name,
+            sruName: sru ? sru.name : '',
+            summary: `Updated "${fieldObj.name}" version on ${pathLabel}`,
+            details: `${fieldObj.name}: "${oldVal || '(empty)'}" → "${newVal || '(empty)'}"${note ? ` | Note: ${note}` : ''}`
+          });
+        }
+      });
+
+      persistDb();
+      closeModal('operationalUpdateModal');
+      renderSystemStatusView();
+      renderHistoryView();
+
+      if (changesCount > 0) {
+        showToast(`Saved ${changesCount} update(s) and logged to History`, 'success');
+      } else {
+        showToast('No changes detected', 'info');
+      }
+    }
+
+    /* ========================================================================
+       8. TAB 2: MALFUNCTION LOG & 5-WAY FILTERING
+       ======================================================================== */
+    function populateLogFilterDropdowns() {
+      const sysSelect = document.getElementById('filterSystem');
+      const lruSelect = document.getElementById('filterLru');
+      const sruSelect = document.getElementById('filterSru');
+
+      // 1. Populate System Filter
+      const currentSys = state.logFilters.system;
+      sysSelect.innerHTML = `<option value="ALL">All Systems</option>` +
+        db.systems.map(s => `<option value="${escapeHtml(s.id)}" ${s.id === currentSys ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('');
+
+      // 2. Populate LRU Filter (unique LRU names within selected system or across all systems)
+      const lruNames = new Set();
+      db.systems.forEach(sys => {
+        if (state.logFilters.system === 'ALL' || sys.id === state.logFilters.system) {
+          sys.lrus.forEach(l => lruNames.add(l.name));
+        }
+      });
+      // Also include any LRU names referenced in historical malfunctions
+      db.malfunctions.forEach(m => {
+        if ((state.logFilters.system === 'ALL' || m.systemId === state.logFilters.system) && m.lruName) {
+          lruNames.add(m.lruName);
+        }
+      });
+
+      if (state.logFilters.lru !== 'ALL' && state.logFilters.lru !== 'UNASSIGNED' && !lruNames.has(state.logFilters.lru)) {
+        state.logFilters.lru = 'ALL';
+      }
+
+      lruSelect.innerHTML =
+        `<option value="ALL">All LRUs</option>` +
+        `<option value="UNASSIGNED" ${state.logFilters.lru === 'UNASSIGNED' ? 'selected' : ''}>System-Level (No LRU)</option>` +
+        Array.from(lruNames).sort().map(name =>
+          `<option value="${escapeHtml(name)}" ${state.logFilters.lru === name ? 'selected' : ''}>${escapeHtml(name)}</option>`
+        ).join('');
+
+      // 3. Populate SRU Filter (unique SRU names matching selected System & LRU)
+      const sruNames = new Set();
+      db.systems.forEach(sys => {
+        if (state.logFilters.system === 'ALL' || sys.id === state.logFilters.system) {
+          sys.lrus.forEach(l => {
+            if (state.logFilters.lru === 'ALL' || l.name === state.logFilters.lru) {
+              l.srus.forEach(s => sruNames.add(s.name));
+            }
+          });
+        }
+      });
+      db.malfunctions.forEach(m => {
+        if (
+          (state.logFilters.system === 'ALL' || m.systemId === state.logFilters.system) &&
+          (state.logFilters.lru === 'ALL' || m.lruName === state.logFilters.lru) &&
+          m.sruName
+        ) {
+          sruNames.add(m.sruName);
+        }
+      });
+
+      if (state.logFilters.sru !== 'ALL' && state.logFilters.sru !== 'UNASSIGNED' && !sruNames.has(state.logFilters.sru)) {
+        state.logFilters.sru = 'ALL';
+      }
+
+      sruSelect.innerHTML =
+        `<option value="ALL">All SRUs</option>` +
+        `<option value="UNASSIGNED" ${state.logFilters.sru === 'UNASSIGNED' ? 'selected' : ''}>LRU/System-Level (No SRU)</option>` +
+        Array.from(sruNames).sort().map(name =>
+          `<option value="${escapeHtml(name)}" ${state.logFilters.sru === name ? 'selected' : ''}>${escapeHtml(name)}</option>`
+        ).join('');
+    }
+
+    function handleLogFilterChange(changedField) {
+      state.logFilters.system = document.getElementById('filterSystem').value;
+      state.logFilters.lru = document.getElementById('filterLru').value;
+      state.logFilters.sru = document.getElementById('filterSru').value;
+      state.logFilters.username = document.getElementById('filterUsername').value.trim();
+      state.logFilters.status = document.getElementById('filterStatus').value;
+
+      if (changedField === 'system' || changedField === 'lru') {
+        populateLogFilterDropdowns();
+      }
+      renderMalfunctionsView();
+    }
+
+    function resetMalfunctionFilters() {
+      state.logFilters = { system: 'ALL', lru: 'ALL', sru: 'ALL', username: '', status: 'ALL' };
+      document.getElementById('filterUsername').value = '';
+      document.getElementById('filterStatus').value = 'ALL';
+      populateLogFilterDropdowns();
+      renderMalfunctionsView();
+    }
+
+    function filterLogsByTarget(systemId, lruName, sruName) {
+      state.logFilters = {
+        system: systemId || 'ALL',
+        lru: lruName || 'ALL',
+        sru: sruName || 'ALL',
+        username: '',
+        status: 'ALL'
+      };
+      document.getElementById('filterUsername').value = '';
+      document.getElementById('filterStatus').value = 'ALL';
+      populateLogFilterDropdowns();
+      switchTab('logs');
+    }
+
+    function toggleMobileFilterPanel() {
+      const panel = document.getElementById('malfunctionFilterPanel');
+      panel.classList.toggle('hidden');
+    }
+
+    function getFilteredMalfunctions() {
+      return db.malfunctions.filter(m => {
+        if (state.logFilters.system !== 'ALL' && m.systemId !== state.logFilters.system) return false;
+        if (state.logFilters.lru === 'UNASSIGNED') {
+          if (m.lruName) return false;
+        } else if (state.logFilters.lru !== 'ALL' && m.lruName !== state.logFilters.lru) {
+          return false;
+        }
+        if (state.logFilters.sru === 'UNASSIGNED') {
+          if (m.sruName) return false;
+        } else if (state.logFilters.sru !== 'ALL' && m.sruName !== state.logFilters.sru) {
+          return false;
+        }
+        if (state.logFilters.username) {
+          const q = state.logFilters.username.toLowerCase();
+          if (!(m.username || '').toLowerCase().includes(q)) return false;
+        }
+        if (state.logFilters.status !== 'ALL' && m.status !== state.logFilters.status) return false;
+        return true;
+      });
+    }
+
+    function renderMalfunctionsView() {
+      populateLogFilterDropdowns();
+      const filtered = getFilteredMalfunctions();
+      const container = document.getElementById('malfunctionListContainer');
+      const chipsEl = document.getElementById('logStatusQuickChips');
+
+      // Update active filter count badge on mobile
+      const activeFiltersCount = [
+        state.logFilters.system !== 'ALL',
+        state.logFilters.lru !== 'ALL',
+        state.logFilters.sru !== 'ALL',
+        Boolean(state.logFilters.username),
+        state.logFilters.status !== 'ALL'
+      ].filter(Boolean).length;
+      const mobileBadge = document.getElementById('mobileActiveFilterCount');
+      if (mobileBadge) {
+        mobileBadge.textContent = activeFiltersCount;
+        mobileBadge.classList.toggle('hidden', activeFiltersCount === 0);
+      }
+
+      // Render Status Quick Chips
+      const counts = {
+        ALL: db.malfunctions.length,
+        Open: db.malfunctions.filter(m => m.status === 'Open').length,
+        'In Progress': db.malfunctions.filter(m => m.status === 'In Progress').length,
+        Closed: db.malfunctions.filter(m => m.status === 'Closed').length
+      };
+
+      chipsEl.innerHTML = ['ALL', 'Open', 'In Progress', 'Closed'].map(st => {
+        const active = state.logFilters.status === st;
+        const label = st === 'ALL' ? 'All Entries' : st;
+        return `
+          <button
+            onclick="document.getElementById('filterStatus').value='${st}'; handleLogFilterChange('status')"
+            class="px-2.5 py-1 rounded-full font-bold transition border ${active ? 't-btn-primary' : 't-elevated t-text-secondary'}"
+          >
+            ${label} (${counts[st] || 0})
+          </button>
+        `;
+      }).join('');
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="t-surface border rounded-2xl p-8 text-center space-y-2">
+            <i class="fa-solid fa-clipboard-check text-3xl t-text-muted"></i>
+            <h3 class="font-bold text-base">No Matching Malfunction Logs</h3>
+            <p class="text-xs t-text-muted">Try clearing one or more filters or log a new system malfunction.</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(m => {
+        const statusClass =
+          m.status === 'Open' ? 'badge-open' :
+          m.status === 'In Progress' ? 'badge-in-progress' : 'badge-closed';
+
+        const needsLruOrSru = !m.lruId || !m.sruId;
+
+        return `
+          <article id="malf-card-${escapeHtml(m.id)}" class="t-surface border rounded-2xl p-4 space-y-3 transition">
+            <!-- Top Row: Status Badge, Hierarchy Path, Operator & Timestamp -->
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-xs font-extrabold px-2.5 py-1 rounded-full ${statusClass}">
+                  ${escapeHtml(m.status)}
+                </span>
+                <!-- System -> LRU -> SRU Breadcrumb Pills -->
+                <span class="text-xs font-bold px-2.5 py-1 rounded-lg t-elevated border">
+                  <i class="fa-solid fa-server mr-1 opacity-70"></i>${escapeHtml(m.systemName)}
+                </span>
+                ${m.lruName ? `
+                  <span class="text-xs font-bold px-2.5 py-1 rounded-lg badge-lru">
+                    LRU: ${escapeHtml(m.lruName)}
+                  </span>
+                ` : `
+                  <button onclick="openMalfunctionModal('${escapeHtml(m.id)}')" class="text-xs font-semibold px-2.5 py-1 rounded-lg border border-dashed t-border-strong t-text-muted hover:t-text-primary">
+                    + Assign LRU
+                  </button>
+                `}
+                ${m.sruName ? `
+                  <span class="text-xs font-bold px-2.5 py-1 rounded-lg badge-sru">
+                    SRU: ${escapeHtml(m.sruName)}
+                  </span>
+                ` : `
+                  <button onclick="openMalfunctionModal('${escapeHtml(m.id)}')" class="text-xs font-semibold px-2.5 py-1 rounded-lg border border-dashed t-border-strong t-text-muted hover:t-text-primary" title="Click to assign SRU to this malfunction">
+                    + Assign SRU
+                  </button>
+                `}
+              </div>
+
+              <!-- Operator & Edit Action -->
+              <div class="flex items-center gap-2 text-xs">
+                <span class="px-2.5 py-1 rounded-lg t-elevated border font-semibold">
+                  <i class="fa-solid fa-user mr-1 text-blue-500"></i>${escapeHtml(m.username)}
+                </span>
+                <button
+                  onclick="openMalfunctionModal('${escapeHtml(m.id)}')"
+                  class="min-h-[38px] px-3 py-1.5 rounded-xl t-btn-soft font-bold flex items-center gap-1.5"
+                >
+                  <i class="fa-solid fa-pen-to-square"></i>
+                  <span>${needsLruOrSru ? 'Edit / Add SRU' : 'Edit / Resolve'}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Separate Malfunction & Resolution Boxes -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              <!-- Malfunction Description Box -->
+              <div class="p-3 rounded-xl t-elevated border space-y-1.5">
+                <div class="flex items-center justify-between text-[11px] font-bold uppercase t-text-muted">
+                  <span class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
+                    Malfunction Description
+                  </span>
+                  <span>Occurred: ${formatDisplayDate(m.occurredAt)}</span>
+                </div>
+                <p class="text-xs sm:text-sm leading-relaxed whitespace-pre-line">${escapeHtml(m.description)}</p>
+              </div>
+
+              <!-- Separate Resolution Box -->
+              <div class="p-3 rounded-xl t-elevated border space-y-1.5">
+                <div class="flex items-center justify-between text-[11px] font-bold uppercase t-text-muted">
+                  <span class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-screwdriver-wrench text-emerald-500"></i>
+                    Resolution Action
+                  </span>
+                  <span>Resolved: ${m.resolvedAt ? formatDisplayDate(m.resolvedAt) : 'Pending'}</span>
+                </div>
+                ${m.resolution
+                  ? `<p class="text-xs sm:text-sm leading-relaxed whitespace-pre-line">${escapeHtml(m.resolution)}</p>`
+                  : `<p class="text-xs italic t-text-muted">No resolution recorded yet. Tap "Edit / Resolve" to document troubleshooting or resolution steps.</p>`
+                }
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    /* ========================================================================
+       9. ADD / EDIT MALFUNCTION MODAL LOGIC
+       ======================================================================== */
+    function openMalfunctionModal(entryId = '') {
+      const titleEl = document.getElementById('malfunctionModalTitle');
+      const deleteBtn = document.getElementById('deleteMalfBtn');
+      const sysSelect = document.getElementById('malfSystemSelect');
+
+      sysSelect.innerHTML = db.systems.map(s =>
+        `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)}</option>`
+      ).join('');
+
+      if (entryId) {
+        const entry = db.malfunctions.find(m => m.id === entryId);
+        if (!entry) return;
+        titleEl.innerHTML = `<i class="fa-solid fa-pen-to-square text-blue-500"></i><span>Edit Malfunction / Assign SRU / Resolve</span>`;
+        deleteBtn.classList.remove('hidden');
+
+        document.getElementById('malfEntryId').value = entry.id;
+        document.getElementById('malfUsername').value = entry.username || state.activeOperator;
+        document.getElementById('malfStatus').value = entry.status;
+        sysSelect.value = entry.systemId;
+        populateMalfLruOptions(entry.lruId);
+        populateMalfSruOptions(entry.sruId);
+        document.getElementById('malfOccurredAt').value = entry.occurredAt || nowIsoLocal(0);
+        document.getElementById('malfDescription').value = entry.description || '';
+        document.getElementById('malfResolvedAt').value = entry.resolvedAt || '';
+        document.getElementById('malfResolution').value = entry.resolution || '';
+      } else {
+        titleEl.innerHTML = `<i class="fa-solid fa-plus-circle text-blue-500"></i><span>New System Malfunction Log</span>`;
+        deleteBtn.classList.add('hidden');
+
+        document.getElementById('malfEntryId').value = '';
+        document.getElementById('malfUsername').value = state.activeOperator;
+        document.getElementById('malfStatus').value = 'Open';
+        sysSelect.value = state.selectedSystemId || (db.systems[0] ? db.systems[0].id : '');
+        populateMalfLruOptions('');
+        populateMalfSruOptions('');
+        document.getElementById('malfOccurredAt').value = nowIsoLocal(0);
+        document.getElementById('malfDescription').value = '';
+        document.getElementById('malfResolvedAt').value = '';
+        document.getElementById('malfResolution').value = '';
+      }
+
+      openModal('malfunctionModal');
+    }
+
+    function openMalfunctionModalForTarget(systemId, lruId = '', sruId = '') {
+      openMalfunctionModal('');
+      const sysSelect = document.getElementById('malfSystemSelect');
+      if (systemId) sysSelect.value = systemId;
+      populateMalfLruOptions(lruId);
+      populateMalfSruOptions(sruId);
+    }
+
+    function populateMalfLruOptions(selectedLruId = '') {
+      const systemId = document.getElementById('malfSystemSelect').value;
+      const lruSelect = document.getElementById('malfLruSelect');
+      const sys = db.systems.find(s => s.id === systemId);
+
+      lruSelect.innerHTML = `<option value="">-- System Level (LRU Optional / Add Later) --</option>`;
+      if (sys) {
+        lruSelect.innerHTML += sys.lrus.map(l =>
+          `<option value="${escapeHtml(l.id)}" ${l.id === selectedLruId ? 'selected' : ''}>${escapeHtml(l.name)}</option>`
+        ).join('');
+      }
+      populateMalfSruOptions('');
+    }
+
+    function populateMalfSruOptions(selectedSruId = '') {
+      const systemId = document.getElementById('malfSystemSelect').value;
+      const lruId = document.getElementById('malfLruSelect').value;
+      const sruSelect = document.getElementById('malfSruSelect');
+      const sys = db.systems.find(s => s.id === systemId);
+      const lru = sys ? sys.lrus.find(l => l.id === lruId) : null;
+
+      sruSelect.innerHTML = `<option value="">-- LRU Level / TBD (SRU Optional / Add Later) --</option>`;
+      if (lru) {
+        sruSelect.innerHTML += lru.srus.map(s =>
+          `<option value="${escapeHtml(s.id)}" ${s.id === selectedSruId ? 'selected' : ''}>${escapeHtml(s.name)}</option>`
+        ).join('');
+      }
+    }
+
+    function handleMalfStatusChange(newStatus) {
+      const resolvedAtInput = document.getElementById('malfResolvedAt');
+      if (newStatus === 'Closed' && !resolvedAtInput.value) {
+        resolvedAtInput.value = nowIsoLocal(0);
+      }
+    }
+
+    function submitMalfunctionForm(e) {
+      e.preventDefault();
+      const entryId = document.getElementById('malfEntryId').value;
+      const username = document.getElementById('malfUsername').value.trim() || state.activeOperator;
+      const status = document.getElementById('malfStatus').value;
+      const systemId = document.getElementById('malfSystemSelect').value;
+      const lruId = document.getElementById('malfLruSelect').value;
+      const sruId = document.getElementById('malfSruSelect').value;
+      const occurredAt = document.getElementById('malfOccurredAt').value;
+      const resolvedAt = document.getElementById('malfResolvedAt').value;
+      const description = document.getElementById('malfDescription').value.trim();
+      const resolution = document.getElementById('malfResolution').value.trim();
+
+      setActiveOperatorInternal(username);
+
+      const sys = db.systems.find(s => s.id === systemId);
+      if (!sys) return;
+      const lru = lruId ? sys.lrus.find(l => l.id === lruId) : null;
+      const sru = (lru && sruId) ? lru.srus.find(s => s.id === sruId) : null;
+
+      const systemName = sys.name;
+      const lruName = lru ? lru.name : '';
+      const sruName = sru ? sru.name : '';
+
+      if (entryId) {
+        // Update existing malfunction & generate detailed diff for History Log
+        const existing = db.malfunctions.find(m => m.id === entryId);
+        if (!existing) return;
+
+        const diffs = [];
+        if (existing.status !== status) diffs.push(`Status: "${existing.status}" → "${status}"`);
+        if ((existing.lruName || '') !== lruName) diffs.push(`LRU: "${existing.lruName || 'Unassigned'}" → "${lruName || 'Unassigned'}"`);
+        if ((existing.sruName || '') !== sruName) diffs.push(`SRU: "${existing.sruName || 'Unassigned'}" → "${sruName || 'Unassigned'}"`);
+        if (existing.description !== description) diffs.push(`Updated malfunction description`);
+        if ((existing.resolution || '') !== resolution) diffs.push(`Updated resolution action`);
+        if ((existing.resolvedAt || '') !== resolvedAt) diffs.push(`Resolved timestamp set to ${formatDisplayDate(resolvedAt)}`);
+
+        existing.username = username;
+        existing.status = status;
+        existing.systemId = systemId;
+        existing.systemName = systemName;
+        existing.lruId = lruId;
+        existing.lruName = lruName;
+        existing.sruId = sruId;
+        existing.sruName = sruName;
+        existing.occurredAt = occurredAt;
+        existing.resolvedAt = resolvedAt;
+        existing.description = description;
+        existing.resolution = resolution;
+
+        addHistoryRecord({
+          category: 'FAULT_UPDATED',
+          username,
+          systemName,
+          lruName: lruName || '(System-Level)',
+          sruName: sruName || '(LRU-Level)',
+          summary: `Updated malfunction log (${status}) on ${systemName}${lruName ? ' / ' + lruName : ''}${sruName ? ' / ' + sruName : ''}`,
+          details: diffs.length ? diffs.join(' | ') : 'Saved log entry'
+        });
+
+        showToast('Malfunction log updated', 'success');
+      } else {
+        // Create new malfunction
+        const newEntry = {
+          id: uid('malf'),
+          systemId,
+          systemName,
+          lruId,
+          lruName,
+          sruId,
+          sruName,
+          username,
+          status,
+          occurredAt,
+          resolvedAt,
+          description,
+          resolution
+        };
+        db.malfunctions.unshift(newEntry);
+
+        addHistoryRecord({
+          category: 'FAULT_CREATED',
+          username,
+          systemName,
+          lruName: lruName || '(System-Level)',
+          sruName: sruName || '(TBD)',
+          summary: `Logged ${status} malfunction on ${systemName}${lruName ? ' / ' + lruName : ''}${sruName ? ' / ' + sruName : ''}`,
+          details: `Description: "${description.substring(0, 120)}${description.length > 120 ? '...' : ''}"`
+        });
+
+        showToast('New malfunction logged', 'success');
+      }
+
+      persistDb();
+      closeModal('malfunctionModal');
+      refreshAllViews();
+    }
+
+    function confirmDeleteMalfunction() {
+      const entryId = document.getElementById('malfEntryId').value;
+      const entry = db.malfunctions.find(m => m.id === entryId);
+      if (!entry) return;
+
+      openConfirmDialog(
+        'Delete Malfunction Entry?',
+        `Are you sure you want to delete this malfunction entry for "${entry.systemName}"? This action will be recorded in the History Log.`,
+        () => {
+          db.malfunctions = db.malfunctions.filter(m => m.id !== entryId);
+          addHistoryRecord({
+            category: 'FAULT_UPDATED',
+            systemName: entry.systemName,
+            lruName: entry.lruName,
+            sruName: entry.sruName,
+            summary: `Deleted malfunction entry on ${entry.systemName}`,
+            details: `Deleted fault description: "${entry.description.substring(0, 80)}"`
+          });
+          persistDb();
+          closeModal('malfunctionModal');
+          refreshAllViews();
+          showToast('Malfunction entry deleted', 'info');
+        }
+      );
+    }
+
+    /* ========================================================================
+       10. TAB 3: SYSTEM SETUP (ARCHITECTURE BUILDER WITH SAFETY LOCK)
+       ======================================================================== */
+    function toggleSetupLock() {
+      state.setupLocked = !state.setupLocked;
+      renderSystemSetupView();
+      showToast(
+        state.setupLocked ? 'System Setup Locked (Safe Mode)' : 'System Setup Unlocked for editing',
+        state.setupLocked ? 'info' : 'warning'
+      );
+    }
+
+    function handleSelectSetupSystem(systemId) {
+      state.setupSystemId = systemId;
+      renderSystemSetupView();
+    }
+
+    function renderSystemSetupView() {
+      // Update Lock Banner & Header Icon
+      const banner = document.getElementById('setupLockBanner');
+      const iconBadge = document.getElementById('setupLockIconBadge');
+      const title = document.getElementById('setupLockTitle');
+      const pill = document.getElementById('setupLockStatusPill');
+      const subtitle = document.getElementById('setupLockSubtitle');
+      const toggleBtn = document.getElementById('setupLockToggleBtn');
+      const desktopLockIcon = document.getElementById('desktopSetupLockIcon');
+
+      if (state.setupLocked) {
+        banner.className = 't-surface border-2 t-border rounded-2xl p-3.5 sm:p-4 transition';
+        iconBadge.innerHTML = '<i class="fa-solid fa-lock text-amber-500"></i>';
+        title.textContent = 'System Setup is Locked';
+        pill.textContent = 'SAFE MODE';
+        pill.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full badge-in-progress';
+        subtitle.textContent = 'Architecture edits are disabled to prevent accidental changes on mobile. Unlock to add/edit LRUs, SRUs, or custom fields.';
+        toggleBtn.className = 'min-h-[44px] px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shrink-0 transition t-btn-primary shadow-sm';
+        toggleBtn.innerHTML = '<i class="fa-solid fa-unlock-keyhole"></i><span>Unlock System Setup</span>';
+        if (desktopLockIcon) desktopLockIcon.className = 'fa-solid fa-lock text-[10px] opacity-75';
+      } else {
+        banner.className = 't-surface border-2 border-amber-500 rounded-2xl p-3.5 sm:p-4 transition';
+        iconBadge.innerHTML = '<i class="fa-solid fa-lock-open text-emerald-500"></i>';
+        title.textContent = 'System Setup is UNLOCKED';
+        pill.textContent = 'EDITING ENABLED';
+        pill.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full badge-closed';
+        subtitle.textContent = 'You can now build systems, clone architectures, and manage up to 30 LRUs, 30 SRUs per LRU, and 0–10 custom HW/SW version fields.';
+        toggleBtn.className = 'min-h-[44px] px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shrink-0 transition t-elevated border';
+        toggleBtn.innerHTML = '<i class="fa-solid fa-lock"></i><span>Lock System Setup</span>';
+        if (desktopLockIcon) desktopLockIcon.className = 'fa-solid fa-lock-open text-[10px] text-emerald-400';
+      }
+
+      // Populate Setup System Select
+      const selectEl = document.getElementById('setupSystemSelect');
+      const treeContainer = document.getElementById('setupTreeContainer');
+      const lruBadge = document.getElementById('setupLruCountBadge');
+
+      if (!db.systems.some(s => s.id === state.setupSystemId)) {
+        state.setupSystemId = db.systems[0] ? db.systems[0].id : '';
+      }
+
+      selectEl.innerHTML = db.systems.map(s =>
+        `<option value="${escapeHtml(s.id)}" ${s.id === state.setupSystemId ? 'selected' : ''}>${escapeHtml(s.name)}</option>`
+      ).join('');
+
+      const activeSys = db.systems.find(s => s.id === state.setupSystemId);
+      if (!activeSys) {
+        lruBadge.textContent = `0 / ${MAX_LRUS_PER_SYSTEM} LRUs`;
+        treeContainer.innerHTML = `<div class="t-surface border rounded-2xl p-6 text-center text-xs t-text-muted">No system available. Unlock setup and create a system.</div>`;
+        applySetupLockStateToButtons();
+        return;
+      }
+
+      lruBadge.textContent = `${activeSys.lrus.length} / ${MAX_LRUS_PER_SYSTEM} LRUs`;
+
+      if (activeSys.lrus.length === 0) {
+        treeContainer.innerHTML = `
+          <div class="t-surface border rounded-2xl p-8 text-center space-y-3">
+            <i class="fa-solid fa-cubes text-3xl t-text-muted"></i>
+            <h3 class="font-bold text-base">No LRUs in "${escapeHtml(activeSys.name)}"</h3>
+            <p class="text-xs t-text-muted">Unlock System Setup and tap "+ Add LRU to System" to build the LRU/SRU tree.</p>
+          </div>`;
+      } else {
+        treeContainer.innerHTML = activeSys.lrus.map((lru, lruIdx) => `
+          <div class="t-surface border rounded-2xl overflow-hidden">
+            <!-- LRU Setup Row -->
+            <div class="p-3.5 sm:p-4 t-elevated border-b t-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="space-y-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded badge-lru">LRU #${lruIdx + 1}</span>
+                  <h3 class="text-base font-extrabold">${escapeHtml(lru.name)}</h3>
+                  <span class="font-mono-code text-xs px-2 py-0.5 rounded t-surface border">S/N: ${escapeHtml(lru.serialNumber || '—')}</span>
+                  <span class="text-xs font-bold px-2 py-0.5 rounded t-surface border">${lru.fields.length} / ${MAX_FIELDS_PER_MODULE} Fields</span>
+                  <span class="text-xs font-bold px-2 py-0.5 rounded badge-sru">${lru.srus.length} / ${MAX_SRUS_PER_LRU} SRUs</span>
+                </div>
+                ${renderHwSwFieldsPills(lru.fields, 'LRU')}
+              </div>
+
+              <div class="flex flex-wrap items-center gap-1.5 shrink-0">
+                <button
+                  onclick="openModuleSetupModal('ADD_SRU', '${escapeHtml(lru.id)}')"
+                  class="setup-requires-unlock min-h-[38px] px-3 py-1.5 rounded-xl t-btn-primary text-xs font-bold flex items-center gap-1"
+                  ${lru.srus.length >= MAX_SRUS_PER_LRU ? 'disabled title="Max 30 SRUs reached"' : ''}
+                >
+                  <i class="fa-solid fa-plus"></i>
+                  <span>Add SRU</span>
+                </button>
+                <button
+                  onclick="openModuleSetupModal('EDIT_LRU', '${escapeHtml(lru.id)}')"
+                  class="setup-requires-unlock min-h-[38px] px-3 py-1.5 rounded-xl t-surface border text-xs font-bold flex items-center gap-1"
+                >
+                  <i class="fa-solid fa-sliders"></i>
+                  <span>Edit LRU / Fields</span>
+                </button>
+                <button
+                  onclick="confirmDeleteLru('${escapeHtml(lru.id)}')"
+                  class="setup-requires-unlock min-h-[38px] px-2.5 py-1.5 rounded-xl t-surface border text-rose-600 text-xs font-bold"
+                  title="Delete LRU"
+                >
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- SRU Setup Tree under this LRU -->
+            <div class="p-3.5 sm:p-4">
+              ${lru.srus.length === 0 ? `
+                <p class="text-xs t-text-muted italic">No SRUs attached to ${escapeHtml(lru.name)}. Tap "+ Add SRU" above to add up to 30 SRUs.</p>
+              ` : `
+                <div class="tree-branch space-y-2">
+                  ${lru.srus.map((sru, sruIdx) => `
+                    <div class="tree-node t-elevated border rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                      <div class="space-y-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                          <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded badge-sru">SRU #${sruIdx + 1}</span>
+                          <span class="font-bold text-sm">${escapeHtml(sru.name)}</span>
+                          <span class="font-mono-code text-xs px-2 py-0.5 rounded t-surface border">S/N: ${escapeHtml(sru.serialNumber || '—')}</span>
+                          <span class="text-[11px] font-semibold px-2 py-0.5 rounded t-surface border">${sru.fields.length} / ${MAX_FIELDS_PER_MODULE} Fields</span>
+                        </div>
+                        ${renderHwSwFieldsPills(sru.fields, 'SRU')}
+                      </div>
+
+                      <div class="flex items-center gap-1.5 self-end sm:self-center shrink-0">
+                        <button
+                          onclick="openModuleSetupModal('EDIT_SRU', '${escapeHtml(lru.id)}', '${escapeHtml(sru.id)}')"
+                          class="setup-requires-unlock min-h-[36px] px-3 py-1 rounded-lg t-surface border text-xs font-semibold flex items-center gap-1"
+                        >
+                          <i class="fa-solid fa-sliders"></i>
+                          <span>Edit SRU / Fields</span>
+                        </button>
+                        <button
+                          onclick="confirmDeleteSru('${escapeHtml(lru.id)}', '${escapeHtml(sru.id)}')"
+                          class="setup-requires-unlock min-h-[36px] px-2.5 py-1 rounded-lg t-surface border text-rose-600 text-xs font-semibold"
+                          title="Delete SRU"
+                        >
+                          <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              `}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      applySetupLockStateToButtons();
+    }
+
+    function applySetupLockStateToButtons() {
+      const buttons = document.querySelectorAll('.setup-requires-unlock');
+      buttons.forEach(btn => {
+        if (state.setupLocked) {
+          btn.disabled = true;
+          btn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+      });
+    }
+
+    /* ========================================================================
+       11. SYSTEM SETUP: CREATE, CLONE, RENAME, DELETE SYSTEM
+       ======================================================================== */
+    function openCreateSystemModal() {
+      if (state.setupLocked) return;
+      document.getElementById('systemManageMode').value = 'CREATE';
+      document.getElementById('systemManageModalTitle').textContent = 'Create New Electronic System';
+      document.getElementById('systemManageNameInput').value = '';
+      document.getElementById('cloneSourceContainer').classList.add('hidden');
+      document.getElementById('cloneOptionsContainer').classList.add('hidden');
+      openModal('systemManageModal');
+    }
+
+    function openCloneSystemModal() {
+      if (state.setupLocked) return;
+      if (!db.systems.length) return;
+      document.getElementById('systemManageMode').value = 'CLONE';
+      document.getElementById('systemManageModalTitle').textContent = 'Clone Existing System Architecture';
+      const sourceSelect = document.getElementById('cloneSourceSystemSelect');
+      sourceSelect.innerHTML = db.systems.map(s =>
+        `<option value="${escapeHtml(s.id)}" ${s.id === state.setupSystemId ? 'selected' : ''}>${escapeHtml(s.name)} (${s.lrus.length} LRUs)</option>`
+      ).join('');
+      const currentSys = db.systems.find(s => s.id === state.setupSystemId) || db.systems[0];
+      document.getElementById('systemManageNameInput').value = `${currentSys.name}-Copy`;
+      document.getElementById('cloneSourceContainer').classList.remove('hidden');
+      document.getElementById('cloneOptionsContainer').classList.remove('hidden');
+      openModal('systemManageModal');
+    }
+
+    function openRenameSystemModal() {
+      if (state.setupLocked) return;
+      const sys = db.systems.find(s => s.id === state.setupSystemId);
+      if (!sys) return;
+      document.getElementById('systemManageMode').value = 'RENAME';
+      document.getElementById('systemManageModalTitle').textContent = `Rename System "${sys.name}"`;
+      document.getElementById('systemManageNameInput').value = sys.name;
+      document.getElementById('cloneSourceContainer').classList.add('hidden');
+      document.getElementById('cloneOptionsContainer').classList.add('hidden');
+      openModal('systemManageModal');
+    }
+
+    function submitSystemManageForm(e) {
+      e.preventDefault();
+      if (state.setupLocked) return;
+      const mode = document.getElementById('systemManageMode').value;
+      const newName = document.getElementById('systemManageNameInput').value.trim();
+      if (!newName) return;
+
+      if (mode === 'CREATE') {
+        const newSys = {
+          id: uid('sys'),
+          name: newName,
+          createdAt: nowIsoLocal(0),
+          lrus: []
+        };
+        db.systems.push(newSys);
+        state.setupSystemId = newSys.id;
+        state.selectedSystemId = newSys.id;
+        addHistoryRecord({
+          category: 'SYSTEM_SETUP',
+          systemName: newName,
+          summary: `Created new system "${newName}"`,
+          details: 'Initialized empty system architecture'
+        });
+        showToast(`Created system "${newName}"`, 'success');
+      } else if (mode === 'CLONE') {
+        const sourceId = document.getElementById('cloneSourceSystemSelect').value;
+        const keepVersions = document.getElementById('cloneKeepVersionsCheckbox').checked;
+        const keepSerials = document.getElementById('cloneKeepSerialsCheckbox').checked;
+        const sourceSys = db.systems.find(s => s.id === sourceId);
+        if (!sourceSys) return;
+
+        const clonedLrus = sourceSys.lrus.map(lru => ({
+          id: uid('lru'),
+          name: lru.name,
+          serialNumber: keepSerials ? lru.serialNumber : '',
+          fields: (lru.fields || []).map(f => ({
+            id: uid('f'),
+            name: f.name,
+            value: keepVersions ? f.value : ''
+          })),
+          srus: (lru.srus || []).map(sru => ({
+            id: uid('sru'),
+            name: sru.name,
+            serialNumber: keepSerials ? sru.serialNumber : '',
+            fields: (sru.fields || []).map(f => ({
+              id: uid('f'),
+              name: f.name,
+              value: keepVersions ? f.value : ''
+            }))
+          }))
+        }));
+
+        const clonedSys = {
+          id: uid('sys'),
+          name: newName,
+          createdAt: nowIsoLocal(0),
+          lrus: clonedLrus
+        };
+        db.systems.push(clonedSys);
+        state.setupSystemId = clonedSys.id;
+        state.selectedSystemId = clonedSys.id;
+        clonedSys.lrus.forEach(l => state.expandedLruIds.add(l.id));
+
+        addHistoryRecord({
+          category: 'SYSTEM_SETUP',
+          systemName: newName,
+          summary: `Cloned system "${newName}" from "${sourceSys.name}"`,
+          details: `Cloned ${clonedLrus.length} LRUs | Copy Versions: ${keepVersions ? 'Yes' : 'No'} | Copy S/Ns: ${keepSerials ? 'Yes' : 'No'}`
+        });
+        showToast(`Cloned "${sourceSys.name}" → "${newName}"`, 'success');
+      } else if (mode === 'RENAME') {
+        const sys = db.systems.find(s => s.id === state.setupSystemId);
+        if (!sys) return;
+        const oldName = sys.name;
+        sys.name = newName;
+        db.malfunctions.forEach(m => {
+          if (m.systemId === sys.id) m.systemName = newName;
+        });
+        addHistoryRecord({
+          category: 'SYSTEM_SETUP',
+          systemName: newName,
+          summary: `Renamed system "${oldName}" → "${newName}"`,
+          details: `Updated system name across configuration and logs`
+        });
+        showToast(`System renamed to "${newName}"`, 'success');
+      }
+
+      persistDb();
+      closeModal('systemManageModal');
+      refreshAllViews();
+    }
+
+    function confirmDeleteSystem() {
+      if (state.setupLocked) return;
+      const sys = db.systems.find(s => s.id === state.setupSystemId);
+      if (!sys) return;
+
+      openConfirmDialog(
+        `Delete System "${sys.name}"?`,
+        `This will remove "${sys.name}" and its ${sys.lrus.length} LRUs from the active configuration. Historical logs will remain in History.`,
+        () => {
+          db.systems = db.systems.filter(s => s.id !== sys.id);
+          addHistoryRecord({
+            category: 'SYSTEM_SETUP',
+            systemName: sys.name,
+            summary: `Deleted system "${sys.name}"`,
+            details: `Removed system with ${sys.lrus.length} LRUs`
+          });
+          state.setupSystemId = db.systems[0] ? db.systems[0].id : '';
+          state.selectedSystemId = state.setupSystemId;
+          persistDb();
+          refreshAllViews();
+          showToast(`Deleted system "${sys.name}"`, 'info');
+        }
+      );
+    }
+
+    /* ========================================================================
+       12. SYSTEM SETUP: ADD / EDIT LRU & SRU + 0-10 CUSTOM FIELDS BUILDER
+       ======================================================================== */
+    function openModuleSetupModal(mode, lruId = '', sruId = '') {
+      if (state.setupLocked) return;
+      const sys = db.systems.find(s => s.id === state.setupSystemId);
+      if (!sys) return;
+
+      // Enforce 30 LRU & 30 SRU limits
+      if (mode === 'ADD_LRU' && sys.lrus.length >= MAX_LRUS_PER_SYSTEM) {
+        showToast(`Maximum limit of ${MAX_LRUS_PER_SYSTEM} LRUs reached for this system`, 'error');
+        return;
+      }
+
+      const lru = lruId ? sys.lrus.find(l => l.id === lruId) : null;
+      if (mode === 'ADD_SRU' && lru && lru.srus.length >= MAX_SRUS_PER_LRU) {
+        showToast(`Maximum limit of ${MAX_SRUS_PER_LRU} SRUs reached for ${lru.name}`, 'error');
+        return;
+      }
+
+      document.getElementById('setupModalMode').value = mode;
+      document.getElementById('setupModalLruId').value = lruId;
+      document.getElementById('setupModalSruId').value = sruId;
+
+      const badge = document.getElementById('setupModalBadge');
+      const title = document.getElementById('setupModalTitle');
+      const nameLabel = document.getElementById('setupModuleNameLabel');
+      const nameInput = document.getElementById('setupModuleName');
+      const snInput = document.getElementById('setupModuleSn');
+      const fieldsList = document.getElementById('setupCustomFieldsList');
+      fieldsList.innerHTML = '';
+
+      if (mode === 'ADD_LRU') {
+        badge.textContent = `NEW LRU (${sys.lrus.length + 1} / ${MAX_LRUS_PER_SYSTEM})`;
+        title.textContent = `Add LRU to ${sys.name}`;
+        nameLabel.textContent = 'LRU Name *';
+        nameInput.value = '';
+        snInput.value = '';
+        // Pre-populate 2 helpful starter fields (user can delete for 0 fields or add up to 10)
+        addSetupCustomFieldRow('HW Rev', '');
+        addSetupCustomFieldRow('SW Version', '');
+      } else if (mode === 'EDIT_LRU' && lru) {
+        badge.textContent = 'EDIT LRU ARCHITECTURE';
+        title.textContent = `${sys.name} → ${lru.name}`;
+        nameLabel.textContent = 'LRU Name *';
+        nameInput.value = lru.name;
+        snInput.value = lru.serialNumber || '';
+        (lru.fields || []).forEach(f => addSetupCustomFieldRow(f.name, f.value));
+      } else if (mode === 'ADD_SRU' && lru) {
+        badge.textContent = `NEW SRU (${lru.srus.length + 1} / ${MAX_SRUS_PER_LRU})`;
+        title.textContent = `Add SRU under ${lru.name}`;
+        nameLabel.textContent = 'SRU Name *';
+        nameInput.value = '';
+        snInput.value = '';
+        addSetupCustomFieldRow('HW Rev', '');
+        addSetupCustomFieldRow('SW Build', '');
+      } else if (mode === 'EDIT_SRU' && lru) {
+        const sru = lru.srus.find(s => s.id === sruId);
+        if (!sru) return;
+        badge.textContent = 'EDIT SRU ARCHITECTURE';
+        title.textContent = `${sys.name} → ${lru.name} → ${sru.name}`;
+        nameLabel.textContent = 'SRU Name *';
+        nameInput.value = sru.name;
+        snInput.value = sru.serialNumber || '';
+        (sru.fields || []).forEach(f => addSetupCustomFieldRow(f.name, f.value));
+      }
+
+      updateSetupCustomFieldCounter();
+      openModal('moduleSetupModal');
+    }
+
+    function addSetupCustomFieldRow(fieldName = '', fieldValue = '') {
+      const list = document.getElementById('setupCustomFieldsList');
+      const currentRows = list.querySelectorAll('.setup-field-row').length;
+      if (currentRows >= MAX_FIELDS_PER_MODULE) {
+        showToast(`Maximum ${MAX_FIELDS_PER_MODULE} custom HW/SW version fields allowed per module`, 'warning');
+        return;
+      }
+
+      const row = document.createElement('div');
+      row.className = 'setup-field-row flex items-center gap-2';
+      row.innerHTML = `
+        <input
+          type="text"
+          value="${escapeHtml(fieldName)}"
+          required
+          placeholder="Field Name (e.g. FPGA Ver)"
+          class="setup-field-name gcl-input text-xs py-2 min-h-[40px] flex-1 font-semibold"
+        />
+        <input
+          type="text"
+          value="${escapeHtml(fieldValue)}"
+          placeholder="Version Text (e.g. v2.1.0)"
+          class="setup-field-value gcl-input font-mono-code text-xs py-2 min-h-[40px] flex-1"
+        />
+        <button
+          type="button"
+          onclick="this.parentElement.remove(); updateSetupCustomFieldCounter();"
+          class="w-9 h-9 rounded-xl t-surface border text-rose-600 flex items-center justify-center shrink-0 hover:opacity-80"
+          title="Remove Field"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      `;
+      list.appendChild(row);
+      updateSetupCustomFieldCounter();
+    }
+
+    function updateSetupCustomFieldCounter() {
+      const list = document.getElementById('setupCustomFieldsList');
+      const count = list.querySelectorAll('.setup-field-row').length;
+      const badge = document.getElementById('setupCustomFieldCountBadge');
+      const addBtn = document.getElementById('addSetupFieldRowBtn');
+      if (badge) badge.textContent = `${count} / ${MAX_FIELDS_PER_MODULE}`;
+      if (addBtn) {
+        addBtn.disabled = count >= MAX_FIELDS_PER_MODULE;
+        addBtn.classList.toggle('opacity-50', count >= MAX_FIELDS_PER_MODULE);
+      }
+    }
+
+    function submitModuleSetupForm(e) {
+      e.preventDefault();
+      if (state.setupLocked) return;
+
+      const sys = db.systems.find(s => s.id === state.setupSystemId);
+      if (!sys) return;
+
+      const mode = document.getElementById('setupModalMode').value;
+      const lruId = document.getElementById('setupModalLruId').value;
+      const sruId = document.getElementById('setupModalSruId').value;
+      const name = document.getElementById('setupModuleName').value.trim();
+      const serialNumber = document.getElementById('setupModuleSn').value.trim();
+
+      const rows = document.querySelectorAll('#setupCustomFieldsList .setup-field-row');
+      const customFields = Array.from(rows).slice(0, MAX_FIELDS_PER_MODULE).map(row => ({
+        id: uid('f'),
+        name: row.querySelector('.setup-field-name').value.trim(),
+        value: row.querySelector('.setup-field-value').value.trim()
+      })).filter(f => f.name !== '');
+
+      if (mode === 'ADD_LRU') {
+        if (sys.lrus.length >= MAX_LRUS_PER_SYSTEM) return;
+        const newLru = {
+          id: uid('lru'),
+          name,
+          serialNumber,
+          fields: customFields,
+          srus: []
+        };
+        sys.lrus.push(newLru);
+        state.expandedLruIds.add(newLru.id);
+        addHistoryRecord({
+          category: 'SYSTEM_SETUP',
+          systemName: sys.name,
+          lruName: name,
+          summary: `Added LRU "${name}" to system "${sys.name}"`,
+          details: `S/N: "${serialNumber || '—'}" | ${customFields.length} custom HW/SW version field(s)`
+        });
+        showToast(`Added LRU "${name}"`, 'success');
+      } else if (mode === 'EDIT_LRU') {
+        const lru = sys.lrus.find(l => l.id === lruId);
+        if (!lru) return;
+        const oldName = lru.name;
+        lru.name = name;
+        lru.serialNumber = serialNumber;
+        lru.fields = customFields;
+        db.malfunctions.forEach(m => {
+          if (m.lruId === lru.id) m.lruName = name;
+        });
+        addHistoryRecord({
+          category: 'SYSTEM_SETUP',
+          systemName: sys.name,
+          lruName: name,
+          summary: `Updated LRU architecture for "${oldName}"`,
+          details: `Name: "${name}", S/N: "${serialNumber || '—'}", Fields (${customFields.length}): ${customFields.map(f => `${f.name}=${f.value || '—'}`).join(', ')}`
+        });
+        showToast(`Updated LRU "${name}"`, 'success');
+      } else if (mode === 'ADD_SRU') {
+        const lru = sys.lrus.find(l => l.id === lruId);
+        if (!lru || lru.srus.length >= MAX_SRUS_PER_LRU) return;
+        const newSru = {
+          id: uid('sru'),
+          name,
+          serialNumber,
+          fields: customFields
+        };
+        lru.srus.push(newSru);
+        state.expandedLruIds.add(lru.id);
+        addHistoryRecord({
+          category: 'SYSTEM_SETUP',
+          systemName: sys.name,
+          lruName: lru.name,
+          sruName: name,
+          summary: `Added SRU "${name}" under ${sys.name} / ${lru.name}`,
+          details: `S/N: "${serialNumber || '—'}" | ${customFields.length} custom HW/SW version field(s)`
+        });
+        showToast(`Added SRU "${name}" under ${lru.name}`, 'success');
+      } else if (mode === 'EDIT_SRU') {
+        const lru = sys.lrus.find(l => l.id === lruId);
+        if (!lru) return;
+        const sru = lru.srus.find(s => s.id === sruId);
+        if (!sru) return;
+        const oldName = sru.name;
+        sru.name = name;
+        sru.serialNumber = serialNumber;
+        sru.fields = customFields;
+        db.malfunctions.forEach(m => {
+          if (m.sruId === sru.id) m.sruName = name;
+        });
+        addHistoryRecord({
+          category: 'SYSTEM_SETUP',
+          systemName: sys.name,
+          lruName: lru.name,
+          sruName: name,
+          summary: `Updated SRU architecture for ${lru.name} / "${oldName}"`,
+          details: `Name: "${name}", S/N: "${serialNumber || '—'}", Fields (${customFields.length}): ${customFields.map(f => `${f.name}=${f.value || '—'}`).join(', ')}`
+        });
+        showToast(`Updated SRU "${name}"`, 'success');
+      }
+
+      persistDb();
+      closeModal('moduleSetupModal');
+      refreshAllViews();
+    }
+
+    function confirmDeleteLru(lruId) {
+      if (state.setupLocked) return;
+      const sys = db.systems.find(s => s.id === state.setupSystemId);
+      if (!sys) return;
+      const lru = sys.lrus.find(l => l.id === lruId);
+      if (!lru) return;
+
+      openConfirmDialog(
+        `Delete LRU "${lru.name}"?`,
+        `Are you sure you want to remove LRU "${lru.name}" and its ${lru.srus.length} SRUs from "${sys.name}"?`,
+        () => {
+          sys.lrus = sys.lrus.filter(l => l.id !== lruId);
+          addHistoryRecord({
+            category: 'SYSTEM_SETUP',
+            systemName: sys.name,
+            lruName: lru.name,
+            summary: `Deleted LRU "${lru.name}" from "${sys.name}"`,
+            details: `Removed LRU and ${lru.srus.length} child SRUs`
+          });
+          persistDb();
+          refreshAllViews();
+          showToast(`Removed LRU "${lru.name}"`, 'info');
+        }
+      );
+    }
+
+    function confirmDeleteSru(lruId, sruId) {
+      if (state.setupLocked) return;
+      const sys = db.systems.find(s => s.id === state.setupSystemId);
+      if (!sys) return;
+      const lru = sys.lrus.find(l => l.id === lruId);
+      if (!lru) return;
+      const sru = lru.srus.find(s => s.id === sruId);
+      if (!sru) return;
+
+      openConfirmDialog(
+        `Delete SRU "${sru.name}"?`,
+        `Remove SRU "${sru.name}" from ${sys.name} → ${lru.name}?`,
+        () => {
+          lru.srus = lru.srus.filter(s => s.id !== sruId);
+          addHistoryRecord({
+            category: 'SYSTEM_SETUP',
+            systemName: sys.name,
+            lruName: lru.name,
+            sruName: sru.name,
+            summary: `Deleted SRU "${sru.name}" from ${sys.name} / ${lru.name}`,
+            details: `S/N at deletion: ${sru.serialNumber || '—'}`
+          });
+          persistDb();
+          refreshAllViews();
+          showToast(`Removed SRU "${sru.name}"`, 'info');
+        }
+      );
+    }
+
+    /* ========================================================================
+       13. TAB 4: HISTORY LOG (TIMESTAMPED AUDIT TRAIL)
+       ======================================================================== */
+    function populateHistorySystemFilter() {
+      const sel = document.getElementById('historyFilterSystem');
+      if (!sel) return;
+      const current = sel.value || 'ALL';
+      const sysNames = new Set(db.systems.map(s => s.name));
+      db.history.forEach(h => { if (h.systemName && h.systemName !== '—') sysNames.add(h.systemName); });
+
+      sel.innerHTML = `<option value="ALL">All Systems</option>` +
+        Array.from(sysNames).map(name =>
+          `<option value="${escapeHtml(name)}" ${name === current ? 'selected' : ''}>${escapeHtml(name)}</option>`
+        ).join('');
+    }
+
+    function getFilteredHistory() {
+      const sysFilter = document.getElementById('historyFilterSystem')?.value || 'ALL';
+      const catFilter = document.getElementById('historyFilterCategory')?.value || 'ALL';
+      const userFilter = (document.getElementById('historyFilterUser')?.value || '').trim().toLowerCase();
+      const textFilter = (document.getElementById('historyFilterText')?.value || '').trim().toLowerCase();
+
+      return db.history.filter(h => {
+        if (sysFilter !== 'ALL' && h.systemName !== sysFilter) return false;
+        if (catFilter !== 'ALL' && h.category !== catFilter) return false;
+        if (userFilter && !(h.username || '').toLowerCase().includes(userFilter)) return false;
+        if (textFilter) {
+          const hay = `${h.systemName} ${h.lruName} ${h.sruName} ${h.summary} ${h.details}`.toLowerCase();
+          if (!hay.includes(textFilter)) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderHistoryView() {
+      const list = getFilteredHistory();
+      const container = document.getElementById('historyListContainer');
+      if (!container) return;
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="t-surface border rounded-2xl p-8 text-center space-y-2">
+            <i class="fa-solid fa-clock-rotate-left text-2xl t-text-muted"></i>
+            <p class="font-bold text-sm">No matching history records found.</p>
+          </div>`;
+        return;
+      }
+
+      const categoryMeta = {
+        SN_REPLACE: { label: 'S/N Replacement', icon: 'fa-barcode', cls: 'badge-in-progress' },
+        VERSION_UPDATE: { label: 'HW/SW Version Update', icon: 'fa-code-branch', cls: 'badge-lru' },
+        FAULT_CREATED: { label: 'Malfunction Logged', icon: 'fa-triangle-exclamation', cls: 'badge-open' },
+        FAULT_UPDATED: { label: 'Fault / Resolution Update', icon: 'fa-screwdriver-wrench', cls: 'badge-closed' },
+        SYSTEM_SETUP: { label: 'Architecture Setup', icon: 'fa-sliders', cls: 'badge-sru' }
+      };
+
+      container.innerHTML = list.map(h => {
+        const meta = categoryMeta[h.category] || { label: h.category, icon: 'fa-circle-dot', cls: 'badge-sru' };
+        return `
+          <div id="hist-card-${escapeHtml(h.id)}" class="t-surface border rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div class="space-y-1">
+              <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                <span class="font-bold px-2.5 py-0.5 rounded-full ${meta.cls}">
+                  <i class="fa-solid ${meta.icon} mr-1"></i>${meta.label}
+                </span>
+                <span class="font-bold px-2 py-0.5 rounded t-elevated border">${escapeHtml(h.systemName)}</span>
+                ${h.lruName ? `<span class="font-semibold px-2 py-0.5 rounded badge-lru">${escapeHtml(h.lruName)}</span>` : ''}
+                ${h.sruName ? `<span class="font-semibold px-2 py-0.5 rounded badge-sru">${escapeHtml(h.sruName)}</span>` : ''}
+              </div>
+              <p class="font-bold text-xs sm:text-sm">${escapeHtml(h.summary)}</p>
+              ${h.details ? `<p class="font-mono-code text-xs t-text-secondary break-words">${escapeHtml(h.details)}</p>` : ''}
+            </div>
+
+            <div class="flex sm:flex-col items-center sm:items-end justify-between gap-1 text-xs shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 t-border">
+              <span class="font-bold px-2 py-0.5 rounded t-elevated border">
+                <i class="fa-solid fa-user mr-1 text-blue-500"></i>${escapeHtml(h.username)}
+              </span>
+              <span class="t-text-muted text-[11px]">${formatDisplayDate(h.timestamp)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ========================================================================
+       14. GLOBAL "FIND" FREE-TEXT SEARCH ACROSS ENTIRE DATABASE
+       ======================================================================== */
+    function handleGlobalSearch(rawQuery) {
+      const overlay = document.getElementById('globalSearchOverlay');
+      const clearBtn = document.getElementById('clearGlobalSearchBtn');
+      const q = (rawQuery || '').trim().toLowerCase();
+
+      clearBtn.classList.toggle('hidden', q.length === 0);
+      if (!q) {
+        overlay.classList.add('hidden');
+        return;
+      }
+
+      const moduleMatches = [];
+      const faultMatches = [];
+      const historyMatches = [];
+
+      // 1. Search Systems, LRUs, SRUs, Serial Numbers, and HW/SW Version Fields
+      db.systems.forEach(sys => {
+        if (sys.name.toLowerCase().includes(q)) {
+          moduleMatches.push({
+            type: 'SYSTEM',
+            systemId: sys.id,
+            targetCardId: '',
+            title: `System: ${sys.name}`,
+            subtitle: `${sys.lrus.length} LRUs configured`
+          });
+        }
+        sys.lrus.forEach(lru => {
+          const lruFieldsText = (lru.fields || []).map(f => `${f.name}: ${f.value}`).join(' | ');
+          const lruHay = `${sys.name} ${lru.name} ${lru.serialNumber || ''} ${lruFieldsText}`.toLowerCase();
+          if (lruHay.includes(q)) {
+            moduleMatches.push({
+              type: 'LRU',
+              systemId: sys.id,
+              lruId: lru.id,
+              targetCardId: `status-card-${lru.id}`,
+              title: `${sys.name} → LRU: ${lru.name}`,
+              subtitle: `S/N: ${lru.serialNumber || '—'}${lruFieldsText ? ` • ${lruFieldsText}` : ''}`
+            });
+          }
+          lru.srus.forEach(sru => {
+            const sruFieldsText = (sru.fields || []).map(f => `${f.name}: ${f.value}`).join(' | ');
+            const sruHay = `${sys.name} ${lru.name} ${sru.name} ${sru.serialNumber || ''} ${sruFieldsText}`.toLowerCase();
+            if (sruHay.includes(q)) {
+              moduleMatches.push({
+                type: 'SRU',
+                systemId: sys.id,
+                lruId: lru.id,
+                sruId: sru.id,
+                targetCardId: `status-card-${sru.id}`,
+                title: `${sys.name} → ${lru.name} → SRU: ${sru.name}`,
+                subtitle: `S/N: ${sru.serialNumber || '—'}${sruFieldsText ? ` • ${sruFieldsText}` : ''}`
+              });
+            }
+          });
+        });
+      });
+
+      // 2. Search Malfunctions & Resolutions
+      db.malfunctions.forEach(m => {
+        const hay = `${m.systemName} ${m.lruName} ${m.sruName} ${m.username} ${m.status} ${m.description} ${m.resolution}`.toLowerCase();
+        if (hay.includes(q)) {
+          faultMatches.push(m);
+        }
+      });
+
+      // 3. Search History Records
+      db.history.forEach(h => {
+        const hay = `${h.systemName} ${h.lruName} ${h.sruName} ${h.username} ${h.summary} ${h.details}`.toLowerCase();
+        if (hay.includes(q)) {
+          historyMatches.push(h);
+        }
+      });
+
+      const totalResults = moduleMatches.length + faultMatches.length + historyMatches.length;
+      if (totalResults === 0) {
+        overlay.innerHTML = `
+          <div class="p-4 text-center text-xs t-text-muted">
+            No matches found for "<strong>${escapeHtml(rawQuery)}</strong>" across systems, S/Ns, versions, malfunctions, or history.
+          </div>`;
+        overlay.classList.remove('hidden');
+        return;
+      }
+
+      overlay.innerHTML = `
+        <div class="space-y-3 text-xs">
+          <div class="flex items-center justify-between border-b t-border pb-1.5">
+            <span class="font-extrabold uppercase t-text-muted">Found ${totalResults} Matching Record(s)</span>
+            <span class="text-[11px] t-text-muted">Tap any result to jump</span>
+          </div>
+
+          ${moduleMatches.length > 0 ? `
+            <div class="space-y-1.5">
+              <div class="font-bold uppercase text-[11px] t-text-muted">Systems, LRUs, SRUs, S/N &amp; Versions (${moduleMatches.length})</div>
+              ${moduleMatches.slice(0, 8).map(item => `
+                <button
+                  onclick="jumpToModuleResult('${escapeHtml(item.systemId)}', '${escapeHtml(item.lruId || '')}', '${escapeHtml(item.targetCardId)}')"
+                  class="w-full text-left p-2.5 rounded-xl t-elevated border hover:opacity-90 flex items-center justify-between gap-2"
+                >
+                  <div>
+                    <div class="font-bold">${escapeHtml(item.title)}</div>
+                    <div class="font-mono-code text-[11px] t-text-secondary truncate max-w-md">${escapeHtml(item.subtitle)}</div>
+                  </div>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded badge-lru shrink-0">${item.type}</span>
+                </button>
+              `).join('')}
+            </div>
+          ` : ''}
+
+          ${faultMatches.length > 0 ? `
+            <div class="space-y-1.5">
+              <div class="font-bold uppercase text-[11px] t-text-muted">Malfunction &amp; Resolution Logs (${faultMatches.length})</div>
+              ${faultMatches.slice(0, 8).map(m => `
+                <button
+                  onclick="jumpToMalfunctionResult('${escapeHtml(m.id)}')"
+                  class="w-full text-left p-2.5 rounded-xl t-elevated border hover:opacity-90 flex items-center justify-between gap-2"
+                >
+                  <div class="space-y-0.5">
+                    <div class="font-bold">${escapeHtml(m.systemName)}${m.lruName ? ' / ' + escapeHtml(m.lruName) : ''}${m.sruName ? ' / ' + escapeHtml(m.sruName) : ''} • <span class="t-text-muted">${escapeHtml(m.username)}</span></div>
+                    <div class="text-[11px] t-text-secondary line-clamp-1">${escapeHtml(m.description)}</div>
+                  </div>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded shrink-0 ${m.status === 'Open' ? 'badge-open' : m.status === 'In Progress' ? 'badge-in-progress' : 'badge-closed'}">${escapeHtml(m.status)}</span>
+                </button>
+              `).join('')}
+            </div>
+          ` : ''}
+
+          ${historyMatches.length > 0 ? `
+            <div class="space-y-1.5">
+              <div class="font-bold uppercase text-[11px] t-text-muted">History Audit Trail (${historyMatches.length})</div>
+              ${historyMatches.slice(0, 6).map(h => `
+                <button
+                  onclick="jumpToHistoryResult('${escapeHtml(h.id)}')"
+                  class="w-full text-left p-2.5 rounded-xl t-elevated border hover:opacity-90 flex items-center justify-between gap-2"
+                >
+                  <div>
+                    <div class="font-bold">${escapeHtml(h.summary)}</div>
+                    <div class="font-mono-code text-[11px] t-text-secondary">${escapeHtml(h.details)}</div>
+                  </div>
+                  <span class="text-[10px] t-text-muted shrink-0">${escapeHtml(h.username)}</span>
+                </button>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `;
+      overlay.classList.remove('hidden');
+    }
+
+    function clearGlobalSearch() {
+      const input = document.getElementById('globalSearchInput');
+      input.value = '';
+      document.getElementById('clearGlobalSearchBtn').classList.add('hidden');
+      document.getElementById('globalSearchOverlay').classList.add('hidden');
+    }
+
+    function jumpToModuleResult(systemId, lruId, targetCardId) {
+      document.getElementById('globalSearchOverlay').classList.add('hidden');
+      state.selectedSystemId = systemId;
+      state.showHwSwVersions = true; // Automatically reveal HW/SW versions when jumping from search
+      if (lruId) state.expandedLruIds.add(lruId);
+      switchTab('status');
+      if (targetCardId) {
+        setTimeout(() => {
+          const el = document.getElementById(targetCardId);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add('jump-highlight');
+            setTimeout(() => el.classList.remove('jump-highlight'), 3600);
+          }
+        }, 80);
+      }
+    }
+
+    function jumpToMalfunctionResult(malfId) {
+      document.getElementById('globalSearchOverlay').classList.add('hidden');
+      resetMalfunctionFilters();
+      switchTab('logs');
+      setTimeout(() => {
+        const el = document.getElementById(`malf-card-${malfId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('jump-highlight');
+          setTimeout(() => el.classList.remove('jump-highlight'), 3600);
+        }
+      }, 80);
+    }
+
+    function jumpToHistoryResult(histId) {
+      document.getElementById('globalSearchOverlay').classList.add('hidden');
+      document.getElementById('historyFilterSystem').value = 'ALL';
+      document.getElementById('historyFilterCategory').value = 'ALL';
+      document.getElementById('historyFilterUser').value = '';
+      document.getElementById('historyFilterText').value = '';
+      switchTab('history');
+      setTimeout(() => {
+        const el = document.getElementById(`hist-card-${histId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('jump-highlight');
+          setTimeout(() => el.classList.remove('jump-highlight'), 3600);
+        }
+      }, 80);
+    }
+
+    /* ========================================================================
+       15. JSON SAVE / LOAD & OPERATOR MANAGEMENT
+       ======================================================================== */
+    async function saveDatabaseToJson() {
+      db.lastUpdated = new Date().toISOString();
+      const jsonString = JSON.stringify(db, null, 2);
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+      const fileName = `GCL-Database-${stamp}.json`;
+
+      // Use File System Access API when supported and not blocked by iframe
+      if (window.showSaveFilePicker) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: fileName,
+            types: [{ description: 'GCL JSON Database', accept: { 'application/json': ['.json'] } }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(jsonString);
+          await writable.close();
+          showToast(`Saved JSON file (${fileName})`, 'success');
+          return;
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+          // Fallback to standard browser download if restricted in iframe/mobile
+        }
+      }
+
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Downloaded ${fileName}`, 'success');
+    }
+
+    function handleLoadJsonFile(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (!parsed || !Array.isArray(parsed.systems)) {
+            showToast('Invalid GCL JSON file structure', 'error');
+            return;
+          }
+          db = {
+            app: parsed.app || 'Genius Configuration and Log (GCL)',
+            schemaVersion: parsed.schemaVersion || '2.4',
+            lastUpdated: new Date().toISOString(),
+            systems: parsed.systems || [],
+            malfunctions: parsed.malfunctions || [],
+            history: parsed.history || []
+          };
+          if (db.systems.length > 0) {
+            state.selectedSystemId = db.systems[0].id;
+            state.setupSystemId = db.systems[0].id;
+            state.expandedLruIds.clear();
+            db.systems[0].lrus.forEach(l => state.expandedLruIds.add(l.id));
+          }
+          addHistoryRecord({
+            category: 'SYSTEM_SETUP',
+            systemName: 'Database',
+            summary: `Loaded GCL database from file "${file.name}"`,
+            details: `${db.systems.length} systems, ${db.malfunctions.length} malfunction logs`
+          });
+          persistDb();
+          refreshAllViews();
+          showToast(`Loaded "${file.name}" (${db.systems.length} systems)`, 'success');
+        } catch (err) {
+          showToast('Error parsing JSON file', 'error');
+        } finally {
+          event.target.value = '';
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function openOperatorModal() {
+      document.getElementById('activeOperatorInput').value = state.activeOperator;
+      const operators = new Set(['Alex.K', 'Dana.M', 'Eli.R', 'Maya.S']);
+      db.malfunctions.forEach(m => { if (m.username) operators.add(m.username); });
+      db.history.forEach(h => { if (h.username) operators.add(h.username); });
+
+      const chips = document.getElementById('knownOperatorsChips');
+      chips.innerHTML = Array.from(operators).map(u => `
+        <button
+          type="button"
+          onclick="document.getElementById('activeOperatorInput').value='${escapeHtml(u)}'"
+          class="px-2.5 py-1 rounded-lg t-elevated border text-xs font-semibold hover:opacity-80"
+        >
+          ${escapeHtml(u)}
+        </button>
+      `).join('');
+      openModal('operatorModal');
+    }
+
+    function setActiveOperatorInternal(name) {
+      if (!name) return;
+      state.activeOperator = name;
+      localStorage.setItem(STORAGE_KEY_OPERATOR, name);
+      document.getElementById('headerOperatorName').textContent = name;
+      updateKnownOperatorDatalist();
+    }
+
+    function saveOperatorName(e) {
+      e.preventDefault();
+      const val = document.getElementById('activeOperatorInput').value.trim();
+      if (!val) return;
+      setActiveOperatorInternal(val);
+      closeModal('operatorModal');
+      showToast(`Active user set to "${val}"`, 'success');
+    }
+
+    function openDataMenuModal() {
+      const totalLrus = db.systems.reduce((acc, s) => acc + s.lrus.length, 0);
+      const totalSrus = db.systems.reduce((acc, s) => acc + s.lrus.reduce((a, l) => a + l.srus.length, 0), 0);
+      document.getElementById('dbStatsSummary').innerHTML = `
+        <div class="font-bold">Current GCL Workspace Summary:</div>
+        <div>• <strong>${db.systems.length}</strong> Electronic System(s) (${totalLrus} LRUs, ${totalSrus} SRUs)</div>
+        <div>• <strong>${db.malfunctions.length}</strong> Malfunction Log Entries</div>
+        <div>• <strong>${db.history.length}</strong> Timestamped History Records</div>
+        <div class="t-text-muted pt-1">Last updated: ${formatDisplayDate(db.lastUpdated)}</div>
+      `;
+      openModal('dataMenuModal');
+    }
+
+    function confirmResetDemoData() {
+      closeModal('dataMenuModal');
+      openConfirmDialog(
+        'Reset to Default "Genius" Demo Data?',
+        'This will restore the default "Genius" system architecture (CSPU, RFSU1, RFSU2 and their SRUs) and sample logs. Save your JSON first if you want to keep current work.',
+        () => {
+          db = createDefaultDatabase();
+          state.selectedSystemId = db.systems[0].id;
+          state.setupSystemId = db.systems[0].id;
+          state.expandedLruIds.clear();
+          db.systems[0].lrus.forEach(l => state.expandedLruIds.add(l.id));
+          persistDb();
+          refreshAllViews();
+          showToast('Demo database restored', 'success');
+        }
+      );
+    }
+
+    /* ========================================================================
+       16. CSV & PDF / PRINTABLE ENGINEERING REPORT GENERATION
+       ======================================================================== */
+    function downloadCsvFile(filename, rows) {
+      const escapeCsvCell = (cell) => {
+        const s = cell === null || cell === undefined ? '' : String(cell);
+        if (s.includes('"') || s.includes(',') || s.includes('\n')) {
+          return `"${s.replace(/"/g, '""')}"`;
+        }
+        return s;
+      };
+      const csvContent = '\uFEFF' + rows.map(r => r.map(escapeCsvCell).join(',')).join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Exported ${filename}`, 'success');
+    }
+
+    function exportSystemStatusCSV() {
+      const sys = db.systems.find(s => s.id === state.selectedSystemId);
+      if (!sys) return;
+      const rows = [
+        ['System Name', 'Level', 'LRU Name', 'SRU Name', 'Serial Number', 'HW/SW Version Fields', 'Active Faults']
+      ];
+      sys.lrus.forEach(lru => {
+        const lruVer = (lru.fields || []).map(f => `${f.name}: ${f.value}`).join(' | ');
+        const lruFaults = db.malfunctions.filter(m => m.systemId === sys.id && m.lruId === lru.id && m.status !== 'Closed').length;
+        rows.push([sys.name, 'LRU', lru.name, '', lru.serialNumber || '', lruVer, lruFaults]);
+
+        lru.srus.forEach(sru => {
+          const sruVer = (sru.fields || []).map(f => `${f.name}: ${f.value}`).join(' | ');
+          const sruFaults = db.malfunctions.filter(m => m.systemId === sys.id && m.lruId === lru.id && m.sruId === sru.id && m.status !== 'Closed').length;
+          rows.push([sys.name, 'SRU', lru.name, sru.name, sru.serialNumber || '', sruVer, sruFaults]);
+        });
+      });
+      downloadCsvFile(`GCL-SystemStatus-${sys.name}.csv`, rows);
+    }
+
+    function exportMalfunctionsCSV() {
+      const list = getFilteredMalfunctions();
+      const rows = [
+        ['ID', 'Status', 'System', 'LRU', 'SRU', 'Username', 'Occurred Date/Time', 'Malfunction Description', 'Resolved Date/Time', 'Resolution Action']
+      ];
+      list.forEach(m => {
+        rows.push([
+          m.id,
+          m.status,
+          m.systemName,
+          m.lruName || '(System-Level)',
+          m.sruName || '(LRU-Level / TBD)',
+          m.username,
+          m.occurredAt,
+          m.description,
+          m.resolvedAt || '',
+          m.resolution || ''
+        ]);
+      });
+      downloadCsvFile(`GCL-MalfunctionLog-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+    }
+
+    function exportHistoryCSV() {
+      const list = getFilteredHistory();
+      const rows = [
+        ['Timestamp', 'Username', 'Category', 'System', 'LRU', 'SRU', 'Summary', 'Details']
+      ];
+      list.forEach(h => {
+        rows.push([
+          h.timestamp,
+          h.username,
+          h.category,
+          h.systemName,
+          h.lruName || '',
+          h.sruName || '',
+          h.summary,
+          h.details || ''
+        ]);
+      });
+      downloadCsvFile(`GCL-HistoryLog-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+    }
+
+    function openReportPreview(reportType) {
+      const previewBody = document.getElementById('reportPreviewScrollBody');
+      const printBody = document.getElementById('printReportContainer');
+      const nowStr = formatDisplayDate(new Date().toISOString());
+
+      let reportHtml = '';
+
+      if (reportType === 'status') {
+        const sys = db.systems.find(s => s.id === state.selectedSystemId) || db.systems[0];
+        if (!sys) return;
+
+        let tableRows = '';
+        sys.lrus.forEach(lru => {
+          const lruFields = (lru.fields || []).map(f => `<strong>${escapeHtml(f.name)}:</strong> ${escapeHtml(f.value || '—')}`).join('<br/>');
+          tableRows += `
+            <tr style="background:#f8fafc; font-weight:700;">
+              <td>LRU</td>
+              <td>${escapeHtml(lru.name)}</td>
+              <td>—</td>
+              <td class="font-mono-code">${escapeHtml(lru.serialNumber || '—')}</td>
+              <td>${lruFields || '—'}</td>
+            </tr>
+          `;
+          lru.srus.forEach(sru => {
+            const sruFields = (sru.fields || []).map(f => `<strong>${escapeHtml(f.name)}:</strong> ${escapeHtml(f.value || '—')}`).join('<br/>');
+            tableRows += `
+              <tr>
+                <td>SRU</td>
+                <td>${escapeHtml(lru.name)}</td>
+                <td><strong>${escapeHtml(sru.name)}</strong></td>
+                <td class="font-mono-code">${escapeHtml(sru.serialNumber || '—')}</td>
+                <td>${sruFields || '—'}</td>
+              </tr>
+            `;
+          });
+        });
+
+        reportHtml = `
+          <div class="space-y-4">
+            <div class="border-b-2 border-slate-800 pb-3 flex justify-between items-start">
+              <div>
+                <h1 class="text-lg font-extrabold">GCL — System Configuration Status Report</h1>
+                <p class="text-xs text-slate-600">System: <strong>${escapeHtml(sys.name)}</strong> (${sys.lrus.length} LRUs)</p>
+              </div>
+              <div class="text-right text-xs text-slate-600">
+                <div>Generated: <strong>${nowStr}</strong></div>
+                <div>Generated By: <strong>${escapeHtml(state.activeOperator)}</strong></div>
+              </div>
+            </div>
+            <table class="w-full border-collapse border border-slate-400 text-xs">
+              <thead>
+                <tr class="bg-slate-100">
+                  <th class="border border-slate-400 p-2 text-left">Type</th>
+                  <th class="border border-slate-400 p-2 text-left">LRU</th>
+                  <th class="border border-slate-400 p-2 text-left">SRU</th>
+                  <th class="border border-slate-400 p-2 text-left">Serial Number (S/N)</th>
+                  <th class="border border-slate-400 p-2 text-left">Hardware &amp; Software Versions</th>
+                </tr>
+              </thead>
+              <tbody>${tableRows}</tbody>
+            </table>
+          </div>
+        `;
+      } else if (reportType === 'logs') {
+        const list = getFilteredMalfunctions();
+        const rowsHtml = list.map(m => `
+          <tr>
+            <td><strong>${escapeHtml(m.status)}</strong></td>
+            <td>${escapeHtml(m.systemName)}</td>
+            <td>${escapeHtml(m.lruName || '—')}</td>
+            <td>${escapeHtml(m.sruName || '—')}</td>
+            <td>${escapeHtml(m.username)}</td>
+            <td>${formatDisplayDate(m.occurredAt)}</td>
+            <td>${escapeHtml(m.description)}</td>
+            <td>${m.resolvedAt ? formatDisplayDate(m.resolvedAt) : '—'}</td>
+            <td>${escapeHtml(m.resolution || '—')}</td>
+          </tr>
+        `).join('');
+
+        reportHtml = `
+          <div class="space-y-4">
+            <div class="border-b-2 border-slate-800 pb-3 flex justify-between items-start">
+              <div>
+                <h1 class="text-lg font-extrabold">GCL — System Malfunction &amp; Resolution Report</h1>
+                <p class="text-xs text-slate-600">Total Filtered Entries: <strong>${list.length}</strong></p>
+              </div>
+              <div class="text-right text-xs text-slate-600">
+                <div>Generated: <strong>${nowStr}</strong></div>
+                <div>Operator: <strong>${escapeHtml(state.activeOperator)}</strong></div>
+              </div>
+            </div>
+            <table class="w-full border-collapse border border-slate-400 text-xs">
+              <thead>
+                <tr class="bg-slate-100">
+                  <th class="border border-slate-400 p-1.5">Status</th>
+                  <th class="border border-slate-400 p-1.5">System</th>
+                  <th class="border border-slate-400 p-1.5">LRU</th>
+                  <th class="border border-slate-400 p-1.5">SRU</th>
+                  <th class="border border-slate-400 p-1.5">User</th>
+                  <th class="border border-slate-400 p-1.5">Occurred</th>
+                  <th class="border border-slate-400 p-1.5">Malfunction Description</th>
+                  <th class="border border-slate-400 p-1.5">Resolved</th>
+                  <th class="border border-slate-400 p-1.5">Resolution Action</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+          </div>
+        `;
+      } else if (reportType === 'history') {
+        const list = getFilteredHistory();
+        const rowsHtml = list.map(h => `
+          <tr>
+            <td>${formatDisplayDate(h.timestamp)}</td>
+            <td>${escapeHtml(h.username)}</td>
+            <td>${escapeHtml(h.category)}</td>
+            <td>${escapeHtml(h.systemName)} ${h.lruName ? '/ ' + escapeHtml(h.lruName) : ''} ${h.sruName ? '/ ' + escapeHtml(h.sruName) : ''}</td>
+            <td><strong>${escapeHtml(h.summary)}</strong><br/>${escapeHtml(h.details || '')}</td>
+          </tr>
+        `).join('');
+
+        reportHtml = `
+          <div class="space-y-4">
+            <div class="border-b-2 border-slate-800 pb-3 flex justify-between items-start">
+              <div>
+                <h1 class="text-lg font-extrabold">GCL — Configuration &amp; Activity History Audit Report</h1>
+                <p class="text-xs text-slate-600">Records: <strong>${list.length}</strong></p>
+              </div>
+              <div class="text-right text-xs text-slate-600">
+                <div>Generated: <strong>${nowStr}</strong></div>
+                <div>Operator: <strong>${escapeHtml(state.activeOperator)}</strong></div>
+              </div>
+            </div>
+            <table class="w-full border-collapse border border-slate-400 text-xs">
+              <thead>
+                <tr class="bg-slate-100">
+                  <th class="border border-slate-400 p-1.5">Timestamp</th>
+                  <th class="border border-slate-400 p-1.5">User</th>
+                  <th class="border border-slate-400 p-1.5">Category</th>
+                  <th class="border border-slate-400 p-1.5">Target Path</th>
+                  <th class="border border-slate-400 p-1.5">Change Details</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      previewBody.innerHTML = reportHtml;
+      printBody.innerHTML = reportHtml;
+      openModal('reportPreviewModal');
+    }
+
+    function triggerBrowserPrint() {
+      window.print();
+    }
+
+    /* ========================================================================
+       17. MODAL & TOAST UTILITIES (NO NATIVE ALERT / CONFIRM)
+       ======================================================================== */
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    }
+
+    function openConfirmDialog(title, message, onConfirm) {
+      document.getElementById('confirmDialogTitle').textContent = title;
+      document.getElementById('confirmDialogMessage').textContent = message;
+      const btn = document.getElementById('confirmDialogActionBtn');
+      btn.onclick = () => {
+        closeModal('confirmDialogModal');
+        if (typeof onConfirm === 'function') onConfirm();
+      };
+      openModal('confirmDialogModal');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const icon =
+        type === 'success' ? 'fa-circle-check text-emerald-500' :
+        type === 'error' ? 'fa-circle-xmark text-rose-500' :
+        type === 'warning' ? 'fa-triangle-exclamation text-amber-500' :
+        'fa-circle-info text-blue-500';
+
+      toast.className = 't-surface border t-border-strong rounded-xl px-3.5 py-2.5 shadow-lg flex items-center gap-2.5 text-xs font-bold pointer-events-auto transition duration-200';
+      toast.innerHTML = `
+        <i class="fa-solid ${icon} text-sm"></i>
+        <span>${escapeHtml(message)}</span>
+      `;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 220);
+      }, 3000);
+    }
+
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
+```
