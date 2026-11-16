@@ -1,10 +1,9 @@
-```html
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-  <title>GCL — Genius Configuration and Log</title>
+  <title>SLCT — System Log and Configuration Tool</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
@@ -343,10 +342,10 @@
             </div>
             <div>
               <div class="flex items-center gap-2">
-                <h1 class="font-extrabold text-base sm:text-lg tracking-tight leading-none">GCL</h1>
-                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full t-elevated border t-text-secondary">v2.4 Field</span>
+                <h1 class="font-extrabold text-base sm:text-lg tracking-tight leading-none">System Log and Configuration Tool</h1>
+                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full t-elevated border t-text-secondary">SLCT v2.4</span>
               </div>
-              <p class="text-xs t-text-muted hidden sm:block">Genius Configuration &amp; Log Management</p>
+              <p class="text-xs t-text-muted hidden sm:block">Electronic System Configuration, P/N &amp; S/N Tracking, and Malfunction Log</p>
             </div>
           </div>
 
@@ -405,7 +404,7 @@
                 id="globalSearchInput"
                 oninput="handleGlobalSearch(this.value)"
                 onfocus="handleGlobalSearch(this.value)"
-                placeholder="Find anything: System, LRU, SRU, S/N, HW/SW ver, fault text, user..."
+                placeholder="Find anything: System, LRU, SRU, P/N, S/N, HW/SW ver, fault text, user..."
                 class="gcl-input pl-9 pr-9 py-2 text-sm min-h-[42px]"
               />
               <button
@@ -524,7 +523,7 @@
           <div class="pt-2 border-t t-border flex flex-wrap items-center justify-between gap-2 text-xs">
             <div class="flex items-center gap-2 t-text-secondary">
               <i class="fa-solid fa-circle-info t-text-muted"></i>
-              <span>Tap <strong>Update S/N &amp; Ver</strong> on any LRU or SRU to log a field replacement or software upgrade.</span>
+              <span>Tap <strong>Update P/N, S/N &amp; Ver</strong> on any LRU or SRU to log a field replacement or software upgrade.</span>
             </div>
             <div class="flex items-center gap-3">
               <button onclick="expandAllStatusLrus(true)" class="font-semibold underline hover:opacity-80">Expand All LRUs</button>
@@ -778,7 +777,7 @@
                 <i class="fa-solid fa-clock-rotate-left text-blue-500"></i>
                 <span>Timestamped Configuration &amp; Activity History</span>
               </h2>
-              <p class="text-xs t-text-muted">Complete audit log of every S/N replacement, HW/SW version change, malfunction update, and architecture edit.</p>
+              <p class="text-xs t-text-muted">Complete audit log of every P/N &amp; S/N replacement, HW/SW version change, malfunction update, and architecture edit.</p>
             </div>
 
             <div class="flex items-center gap-2">
@@ -811,7 +810,8 @@
               <label class="block text-[11px] font-bold uppercase t-text-muted mb-1">Category</label>
               <select id="historyFilterCategory" onchange="renderHistoryView()" class="gcl-input text-xs py-2 min-h-[40px]">
                 <option value="ALL">All Event Categories</option>
-                <option value="SN_REPLACE">Serial Number Replacement</option>
+                <option value="PN_REPLACE">Part Number (P/N) Replacement</option>
+                <option value="SN_REPLACE">Serial Number (S/N) Replacement</option>
                 <option value="VERSION_UPDATE">HW/SW Version Update</option>
                 <option value="FAULT_CREATED">Malfunction Logged</option>
                 <option value="FAULT_UPDATED">Malfunction / Resolution Updated</option>
@@ -834,7 +834,7 @@
                 type="text"
                 id="historyFilterText"
                 oninput="renderHistoryView()"
-                placeholder="LRU, SRU, S/N, version..."
+                placeholder="LRU, SRU, P/N, S/N, version..."
                 class="gcl-input text-xs py-2 min-h-[40px]"
               />
             </div>
@@ -901,10 +901,16 @@
             <input type="text" id="opUpdateUsername" list="operatorSuggestionsList" required class="gcl-input font-semibold" placeholder="Enter your username" />
           </div>
 
-          <!-- Serial Number -->
-          <div>
-            <label class="block text-xs font-bold uppercase t-text-muted mb-1">Module Serial Number (S/N)</label>
-            <input type="text" id="opUpdateSerialNumber" class="gcl-input font-mono-code font-semibold" placeholder="e.g., SN-CSPU-9041" />
+          <!-- Part Number (P/N) & Serial Number (S/N) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold uppercase t-text-muted mb-1">Module Part Number (P/N)</label>
+              <input type="text" id="opUpdatePartNumber" class="gcl-input font-mono-code font-semibold" placeholder="e.g., PN-CSPU-100" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase t-text-muted mb-1">Module Serial Number (S/N)</label>
+              <input type="text" id="opUpdateSerialNumber" class="gcl-input font-mono-code font-semibold" placeholder="e.g., SN-CSPU-9041" />
+            </div>
           </div>
 
           <!-- Custom HW/SW Version Fields (Values editable operationally) -->
@@ -1086,10 +1092,14 @@
           <input type="hidden" id="setupModalLruId" />
           <input type="hidden" id="setupModalSruId" />
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label class="block text-xs font-bold uppercase t-text-muted mb-1" id="setupModuleNameLabel">Module Name *</label>
               <input type="text" id="setupModuleName" required class="gcl-input font-bold" placeholder="e.g., CSPU or sp" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase t-text-muted mb-1">Part Number (P/N)</label>
+              <input type="text" id="setupModulePn" class="gcl-input font-mono-code" placeholder="e.g., PN-4010-A" />
             </div>
             <div>
               <label class="block text-xs font-bold uppercase t-text-muted mb-1">Serial Number (S/N)</label>
@@ -1166,12 +1176,16 @@
           <div id="cloneOptionsContainer" class="hidden p-3 rounded-xl t-elevated border space-y-2.5 text-xs">
             <p class="font-bold uppercase t-text-muted">Clone Data Options:</p>
             <label class="flex items-start gap-2.5 cursor-pointer">
+              <input type="checkbox" id="cloneKeepPartNumbersCheckbox" checked class="mt-0.5 w-4 h-4" />
+              <span><strong>Copy Part Numbers (P/N)</strong> (Keep module Part Numbers from source system)</span>
+            </label>
+            <label class="flex items-start gap-2.5 cursor-pointer">
               <input type="checkbox" id="cloneKeepVersionsCheckbox" checked class="mt-0.5 w-4 h-4" />
               <span><strong>Copy HW/SW Version Values</strong> (Keep all custom field names and version values from source system)</span>
             </label>
             <label class="flex items-start gap-2.5 cursor-pointer">
               <input type="checkbox" id="cloneKeepSerialsCheckbox" class="mt-0.5 w-4 h-4" />
-              <span><strong>Copy Serial Numbers</strong> (Uncheck to leave Serial Numbers blank for a new hardware unit)</span>
+              <span><strong>Copy Serial Numbers (S/N)</strong> (Uncheck to leave Serial Numbers blank for a new hardware unit)</span>
             </label>
           </div>
 
@@ -1224,7 +1238,7 @@
         <div class="px-4 py-3.5 border-b t-border flex items-center justify-between">
           <h3 class="text-base font-extrabold flex items-center gap-2">
             <i class="fa-solid fa-database text-blue-500"></i>
-            <span>GCL JSON Database Management</span>
+            <span>SLCT JSON Database Management</span>
           </h3>
           <button onclick="closeModal('dataMenuModal')" class="w-9 h-9 rounded-full t-elevated flex items-center justify-center">
             <i class="fa-solid fa-xmark"></i>
@@ -1238,11 +1252,11 @@
           <div class="space-y-2 pt-2">
             <button onclick="saveDatabaseToJson(); closeModal('dataMenuModal')" class="w-full min-h-[44px] px-4 py-2.5 rounded-xl t-btn-primary font-bold flex items-center justify-center gap-2">
               <i class="fa-solid fa-download"></i>
-              <span>Download / Save GCL JSON File</span>
+              <span>Download / Save SLCT JSON File</span>
             </button>
             <button onclick="document.getElementById('jsonFileInput').click(); closeModal('dataMenuModal')" class="w-full min-h-[44px] px-4 py-2.5 rounded-xl t-elevated border font-bold flex items-center justify-center gap-2">
               <i class="fa-solid fa-upload"></i>
-              <span>Load GCL JSON File from Device</span>
+              <span>Load SLCT JSON File from Device</span>
             </button>
             <button onclick="confirmResetDemoData()" class="w-full min-h-[44px] px-4 py-2.5 rounded-xl t-elevated border text-rose-600 font-bold flex items-center justify-center gap-2">
               <i class="fa-solid fa-rotate-left"></i>
@@ -1315,9 +1329,9 @@
     /* ========================================================================
        1. CONSTANTS, STORAGE KEYS & INITIAL "GENIUS" SYSTEM SEED DATA
        ======================================================================== */
-    const STORAGE_KEY_DB = 'GCL_DATABASE_V2';
-    const STORAGE_KEY_THEME = 'GCL_THEME_V2';
-    const STORAGE_KEY_OPERATOR = 'GCL_OPERATOR_V2';
+    const STORAGE_KEY_DB = 'SLCT_DATABASE_V2';
+    const STORAGE_KEY_THEME = 'SLCT_THEME_V2';
+    const STORAGE_KEY_OPERATOR = 'SLCT_OPERATOR_V2';
     const MAX_LRUS_PER_SYSTEM = 30;
     const MAX_SRUS_PER_LRU = 30;
     const MAX_FIELDS_PER_MODULE = 10;
@@ -1372,7 +1386,7 @@
       const sysGenius2Id = 'sys_genius_02';
 
       return {
-        app: 'Genius Configuration and Log (GCL)',
+        app: 'System Log and Configuration Tool (SLCT)',
         schemaVersion: '2.4',
         lastUpdated: new Date().toISOString(),
         systems: [
@@ -1384,6 +1398,9 @@
               {
                 id: 'lru_cspu',
                 name: 'CSPU',
+                pn: 'PN-CSPU-100A',
+                sn: 'SN-CSPU-4401',
+                partNumber: 'PN-CSPU-100A',
                 serialNumber: 'SN-CSPU-4401',
                 fields: [
                   { id: 'f_cspu_1', name: 'HW Rev', value: 'Rev C.2' },
@@ -1394,6 +1411,9 @@
                   {
                     id: 'sru_cspu_sp',
                     name: 'sp',
+                    pn: 'PN-SP-210B',
+                    sn: 'SN-SP-88101',
+                    partNumber: 'PN-SP-210B',
                     serialNumber: 'SN-SP-88101',
                     fields: [
                       { id: 'f_cspu_sp_1', name: 'PCB HW Ver', value: 'B1.4' },
@@ -1404,6 +1424,9 @@
                   {
                     id: 'sru_cspu_exc',
                     name: 'exc',
+                    pn: 'PN-EXC-330A',
+                    sn: 'SN-EXC-55019',
+                    partNumber: 'PN-EXC-330A',
                     serialNumber: 'SN-EXC-55019',
                     fields: [
                       { id: 'f_cspu_exc_1', name: 'HW Rev', value: 'A3.0' },
@@ -1413,11 +1436,14 @@
                   {
                     id: 'sru_cspu_sbc',
                     name: 'sbc',
+                    pn: 'PN-SBC-410C',
+                    sn: 'SN-SBC-31009',
+                    partNumber: 'PN-SBC-410C',
                     serialNumber: 'SN-SBC-31009',
                     fields: [
                       { id: 'f_cspu_sbc_1', name: 'Board Rev', value: 'D1.1' },
                       { id: 'f_cspu_sbc_2', name: 'Linux Kernel', value: '6.1.42-rt13' },
-                      { id: 'f_cspu_sbc_3', name: 'App SW Version', value: 'GCL-Core-5.4.1' }
+                      { id: 'f_cspu_sbc_3', name: 'App SW Version', value: 'SLCT-Core-5.4.1' }
                     ]
                   }
                 ]
@@ -1425,6 +1451,9 @@
               {
                 id: 'lru_rfsu1',
                 name: 'RFSU1',
+                pn: 'PN-RFSU-500B',
+                sn: 'SN-RFSU1-7101',
+                partNumber: 'PN-RFSU-500B',
                 serialNumber: 'SN-RFSU1-7101',
                 fields: [
                   { id: 'f_rfsu1_1', name: 'Chassis HW', value: 'Rev B.1' },
@@ -1434,6 +1463,9 @@
                   {
                     id: 'sru_rfsu1_sp',
                     name: 'sp',
+                    pn: 'PN-SP-210B',
+                    sn: 'SN-SP-88109',
+                    partNumber: 'PN-SP-210B',
                     serialNumber: 'SN-SP-88109',
                     fields: [
                       { id: 'f_rfsu1_sp_1', name: 'PCB HW Ver', value: 'B1.4' },
@@ -1443,6 +1475,9 @@
                   {
                     id: 'sru_rfsu1_lexc',
                     name: 'lexc',
+                    pn: 'PN-LEXC-615A',
+                    sn: 'SN-LEXC-62041',
+                    partNumber: 'PN-LEXC-615A',
                     serialNumber: 'SN-LEXC-62041',
                     fields: [
                       { id: 'f_rfsu1_lexc_1', name: 'RF HW Rev', value: 'C2.0' },
@@ -1452,6 +1487,9 @@
                   {
                     id: 'sru_rfsu1_lsbc',
                     name: 'lsbc',
+                    pn: 'PN-LSBC-720A',
+                    sn: 'SN-LSBC-19022',
+                    partNumber: 'PN-LSBC-720A',
                     serialNumber: 'SN-LSBC-19022',
                     fields: [
                       { id: 'f_rfsu1_lsbc_1', name: 'HW Rev', value: 'B2.1' },
@@ -1464,6 +1502,9 @@
               {
                 id: 'lru_rfsu2',
                 name: 'RFSU2',
+                pn: 'PN-RFSU-500B',
+                sn: 'SN-RFSU2-7102',
+                partNumber: 'PN-RFSU-500B',
                 serialNumber: 'SN-RFSU2-7102',
                 fields: [
                   { id: 'f_rfsu2_1', name: 'Chassis HW', value: 'Rev B.1' },
@@ -1473,6 +1514,9 @@
                   {
                     id: 'sru_rfsu2_lexc',
                     name: 'lexc',
+                    pn: 'PN-LEXC-615A',
+                    sn: 'SN-LEXC-62088',
+                    partNumber: 'PN-LEXC-615A',
                     serialNumber: 'SN-LEXC-62088',
                     fields: [
                       { id: 'f_rfsu2_lexc_1', name: 'RF HW Rev', value: 'C2.1' },
@@ -1482,6 +1526,9 @@
                   {
                     id: 'sru_rfsu2_sbc2',
                     name: 'sbc2',
+                    pn: 'PN-SBC2-840A',
+                    sn: 'SN-SBC2-49015',
+                    partNumber: 'PN-SBC2-840A',
                     serialNumber: 'SN-SBC2-49015',
                     fields: [
                       { id: 'f_rfsu2_sbc2_1', name: 'HW Rev', value: 'A4.2' },
@@ -1491,6 +1538,9 @@
                   {
                     id: 'sru_rfsu2_pdc',
                     name: 'pdc',
+                    pn: 'PN-PDC-910E',
+                    sn: 'SN-PDC-90312',
+                    partNumber: 'PN-PDC-910E',
                     serialNumber: 'SN-PDC-90312',
                     fields: [
                       { id: 'f_rfsu2_pdc_1', name: 'Power Board HW', value: 'Rev E.0' },
@@ -1509,6 +1559,9 @@
               {
                 id: 'lru_g2_cspu',
                 name: 'CSPU',
+                pn: 'PN-CSPU-100A',
+                sn: 'SN-CSPU-4409',
+                partNumber: 'PN-CSPU-100A',
                 serialNumber: 'SN-CSPU-4409',
                 fields: [
                   { id: 'f_g2_cspu_1', name: 'HW Rev', value: 'Rev C.2' },
@@ -1518,6 +1571,9 @@
                   {
                     id: 'sru_g2_cspu_sp',
                     name: 'sp',
+                    pn: 'PN-SP-210B',
+                    sn: 'SN-SP-88210',
+                    partNumber: 'PN-SP-210B',
                     serialNumber: 'SN-SP-88210',
                     fields: [
                       { id: 'f_g2_sp_1', name: 'PCB HW Ver', value: 'B1.4' },
@@ -1527,10 +1583,13 @@
                   {
                     id: 'sru_g2_cspu_sbc',
                     name: 'sbc',
+                    pn: 'PN-SBC-410C',
+                    sn: 'SN-SBC-31104',
+                    partNumber: 'PN-SBC-410C',
                     serialNumber: 'SN-SBC-31104',
                     fields: [
                       { id: 'f_g2_sbc_1', name: 'Board Rev', value: 'D1.2' },
-                      { id: 'f_g2_sbc_2', name: 'App SW Version', value: 'GCL-Core-5.5.0' }
+                      { id: 'f_g2_sbc_2', name: 'App SW Version', value: 'SLCT-Core-5.5.0' }
                     ]
                   }
                 ]
@@ -1971,6 +2030,9 @@
                     <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded badge-lru">LRU</span>
                     <h3 class="text-base font-extrabold tracking-tight">${escapeHtml(lru.name)}</h3>
                     <span class="font-mono-code text-xs font-semibold px-2.5 py-0.5 rounded-md t-surface border">
+                      P/N: ${lru.partNumber ? escapeHtml(lru.partNumber) : '<em class="t-text-muted">Not Set</em>'}
+                    </span>
+                    <span class="font-mono-code text-xs font-semibold px-2.5 py-0.5 rounded-md t-surface border">
                       S/N: ${lru.serialNumber ? escapeHtml(lru.serialNumber) : '<em class="t-text-muted">Not Set</em>'}
                     </span>
                     <span class="text-xs t-text-muted font-medium">(${lru.srus.length} SRU${lru.srus.length === 1 ? '' : 's'})</span>
@@ -1991,10 +2053,10 @@
                 <button
                   onclick="openOperationalUpdateModal('${escapeHtml(activeSys.id)}', '${escapeHtml(lru.id)}', '')"
                   class="min-h-[40px] px-3 py-1.5 rounded-xl t-surface border text-xs font-bold flex items-center gap-1.5 hover:opacity-80 transition"
-                  title="Update LRU Serial Number or HW/SW Versions"
+                  title="Update LRU Part Number, Serial Number, or HW/SW Versions"
                 >
                   <i class="fa-solid fa-pen-to-square text-blue-500"></i>
-                  <span>Update S/N &amp; Ver</span>
+                  <span>Update P/N, S/N &amp; Ver</span>
                 </button>
                 <button
                   onclick="openMalfunctionModalForTarget('${escapeHtml(activeSys.id)}', '${escapeHtml(lru.id)}', '')"
@@ -2024,6 +2086,9 @@
                             <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded badge-sru">SRU</span>
                             <span class="font-bold text-sm">${escapeHtml(sru.name)}</span>
                             <span class="font-mono-code text-xs font-semibold px-2 py-0.5 rounded t-surface border">
+                              P/N: ${sru.partNumber ? escapeHtml(sru.partNumber) : '<em class="t-text-muted">Not Set</em>'}
+                            </span>
+                            <span class="font-mono-code text-xs font-semibold px-2 py-0.5 rounded t-surface border">
                               S/N: ${sru.serialNumber ? escapeHtml(sru.serialNumber) : '<em class="t-text-muted">Not Set</em>'}
                             </span>
                             ${sruFaults.length > 0 ? `
@@ -2043,7 +2108,7 @@
                             class="min-h-[38px] px-2.5 py-1 rounded-lg t-surface border text-xs font-semibold flex items-center gap-1.5 hover:opacity-80"
                           >
                             <i class="fa-solid fa-pen-to-square text-blue-500"></i>
-                            <span>Update S/N &amp; Ver</span>
+                            <span>Update P/N, S/N &amp; Ver</span>
                           </button>
                           <button
                             onclick="openMalfunctionModalForTarget('${escapeHtml(activeSys.id)}', '${escapeHtml(lru.id)}', '${escapeHtml(sru.id)}')"
@@ -2081,7 +2146,7 @@
     }
 
     /* ========================================================================
-       7. OPERATIONAL SERIAL NUMBER & HW/SW VERSION REPLACEMENT MODAL
+       7. OPERATIONAL PART NUMBER, SERIAL NUMBER & HW/SW VERSION MODAL
        ======================================================================== */
     function openOperationalUpdateModal(systemId, lruId, sruId = '') {
       const sys = db.systems.find(s => s.id === systemId);
@@ -2095,6 +2160,7 @@
       document.getElementById('opUpdateLruId').value = lruId;
       document.getElementById('opUpdateSruId').value = sruId || '';
       document.getElementById('opUpdateUsername').value = state.activeOperator;
+      document.getElementById('opUpdatePartNumber').value = target.partNumber || '';
       document.getElementById('opUpdateSerialNumber').value = target.serialNumber || '';
       document.getElementById('opUpdateNote').value = '';
 
@@ -2141,6 +2207,7 @@
       const lruId = document.getElementById('opUpdateLruId').value;
       const sruId = document.getElementById('opUpdateSruId').value;
       const username = document.getElementById('opUpdateUsername').value.trim() || state.activeOperator;
+      const newPn = document.getElementById('opUpdatePartNumber').value.trim();
       const newSn = document.getElementById('opUpdateSerialNumber').value.trim();
       const note = document.getElementById('opUpdateNote').value.trim();
 
@@ -2156,10 +2223,28 @@
 
       let changesCount = 0;
 
-      // 1. Check Serial Number diff
-      const oldSn = (target.serialNumber || '').trim();
+      // 1a. Check Part Number (P/N) diff
+      const oldPn = (target.partNumber || target.pn || '').trim();
+      if (oldPn !== newPn) {
+        target.partNumber = newPn;
+        target.pn = newPn;
+        changesCount++;
+        addHistoryRecord({
+          category: 'PN_REPLACE',
+          username,
+          systemName: sys.name,
+          lruName: lru.name,
+          sruName: sru ? sru.name : '',
+          summary: `Updated Part Number (P/N) on ${pathLabel}`,
+          details: `Part Number: "${oldPn || '(empty)'}" → "${newPn || '(empty)'}"${note ? ` | Note: ${note}` : ''}`
+        });
+      }
+
+      // 1b. Check Serial Number (S/N) diff
+      const oldSn = (target.serialNumber || target.sn || '').trim();
       if (oldSn !== newSn) {
         target.serialNumber = newSn;
+        target.sn = newSn;
         changesCount++;
         addHistoryRecord({
           category: 'SN_REPLACE',
@@ -2782,6 +2867,7 @@
                 <div class="flex flex-wrap items-center gap-2">
                   <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded badge-lru">LRU #${lruIdx + 1}</span>
                   <h3 class="text-base font-extrabold">${escapeHtml(lru.name)}</h3>
+                  <span class="font-mono-code text-xs px-2 py-0.5 rounded t-surface border">P/N: ${escapeHtml(lru.partNumber || '—')}</span>
                   <span class="font-mono-code text-xs px-2 py-0.5 rounded t-surface border">S/N: ${escapeHtml(lru.serialNumber || '—')}</span>
                   <span class="text-xs font-bold px-2 py-0.5 rounded t-surface border">${lru.fields.length} / ${MAX_FIELDS_PER_MODULE} Fields</span>
                   <span class="text-xs font-bold px-2 py-0.5 rounded badge-sru">${lru.srus.length} / ${MAX_SRUS_PER_LRU} SRUs</span>
@@ -2827,6 +2913,7 @@
                         <div class="flex flex-wrap items-center gap-2">
                           <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded badge-sru">SRU #${sruIdx + 1}</span>
                           <span class="font-bold text-sm">${escapeHtml(sru.name)}</span>
+                          <span class="font-mono-code text-xs px-2 py-0.5 rounded t-surface border">P/N: ${escapeHtml(sru.partNumber || '—')}</span>
                           <span class="font-mono-code text-xs px-2 py-0.5 rounded t-surface border">S/N: ${escapeHtml(sru.serialNumber || '—')}</span>
                           <span class="text-[11px] font-semibold px-2 py-0.5 rounded t-surface border">${sru.fields.length} / ${MAX_FIELDS_PER_MODULE} Fields</span>
                         </div>
@@ -2941,31 +3028,46 @@
         showToast(`Created system "${newName}"`, 'success');
       } else if (mode === 'CLONE') {
         const sourceId = document.getElementById('cloneSourceSystemSelect').value;
+        const keepPartNumbers = document.getElementById('cloneKeepPartNumbersCheckbox')?.checked ?? true;
         const keepVersions = document.getElementById('cloneKeepVersionsCheckbox').checked;
         const keepSerials = document.getElementById('cloneKeepSerialsCheckbox').checked;
         const sourceSys = db.systems.find(s => s.id === sourceId);
         if (!sourceSys) return;
 
-        const clonedLrus = sourceSys.lrus.map(lru => ({
-          id: uid('lru'),
-          name: lru.name,
-          serialNumber: keepSerials ? lru.serialNumber : '',
-          fields: (lru.fields || []).map(f => ({
-            id: uid('f'),
-            name: f.name,
-            value: keepVersions ? f.value : ''
-          })),
-          srus: (lru.srus || []).map(sru => ({
-            id: uid('sru'),
-            name: sru.name,
-            serialNumber: keepSerials ? sru.serialNumber : '',
-            fields: (sru.fields || []).map(f => ({
+        const clonedLrus = sourceSys.lrus.map(lru => {
+          const lruPn = keepPartNumbers ? (lru.partNumber || lru.pn || '') : '';
+          const lruSn = keepSerials ? (lru.serialNumber || lru.sn || '') : '';
+          return {
+            id: uid('lru'),
+            name: lru.name,
+            pn: lruPn,
+            sn: lruSn,
+            partNumber: lruPn,
+            serialNumber: lruSn,
+            fields: (lru.fields || []).map(f => ({
               id: uid('f'),
               name: f.name,
               value: keepVersions ? f.value : ''
-            }))
-          }))
-        }));
+            })),
+            srus: (lru.srus || []).map(sru => {
+              const sruPn = keepPartNumbers ? (sru.partNumber || sru.pn || '') : '';
+              const sruSn = keepSerials ? (sru.serialNumber || sru.sn || '') : '';
+              return {
+                id: uid('sru'),
+                name: sru.name,
+                pn: sruPn,
+                sn: sruSn,
+                partNumber: sruPn,
+                serialNumber: sruSn,
+                fields: (sru.fields || []).map(f => ({
+                  id: uid('f'),
+                  name: f.name,
+                  value: keepVersions ? f.value : ''
+                }))
+              };
+            })
+          };
+        });
 
         const clonedSys = {
           id: uid('sys'),
@@ -2982,7 +3084,7 @@
           category: 'SYSTEM_SETUP',
           systemName: newName,
           summary: `Cloned system "${newName}" from "${sourceSys.name}"`,
-          details: `Cloned ${clonedLrus.length} LRUs | Copy Versions: ${keepVersions ? 'Yes' : 'No'} | Copy S/Ns: ${keepSerials ? 'Yes' : 'No'}`
+          details: `Cloned ${clonedLrus.length} LRUs | Copy P/Ns: ${keepPartNumbers ? 'Yes' : 'No'} | Copy Versions: ${keepVersions ? 'Yes' : 'No'} | Copy S/Ns: ${keepSerials ? 'Yes' : 'No'}`
         });
         showToast(`Cloned "${sourceSys.name}" → "${newName}"`, 'success');
       } else if (mode === 'RENAME') {
@@ -3060,6 +3162,7 @@
       const title = document.getElementById('setupModalTitle');
       const nameLabel = document.getElementById('setupModuleNameLabel');
       const nameInput = document.getElementById('setupModuleName');
+      const pnInput = document.getElementById('setupModulePn');
       const snInput = document.getElementById('setupModuleSn');
       const fieldsList = document.getElementById('setupCustomFieldsList');
       fieldsList.innerHTML = '';
@@ -3069,6 +3172,7 @@
         title.textContent = `Add LRU to ${sys.name}`;
         nameLabel.textContent = 'LRU Name *';
         nameInput.value = '';
+        pnInput.value = '';
         snInput.value = '';
         // Pre-populate 2 helpful starter fields (user can delete for 0 fields or add up to 10)
         addSetupCustomFieldRow('HW Rev', '');
@@ -3078,6 +3182,7 @@
         title.textContent = `${sys.name} → ${lru.name}`;
         nameLabel.textContent = 'LRU Name *';
         nameInput.value = lru.name;
+        pnInput.value = lru.partNumber || '';
         snInput.value = lru.serialNumber || '';
         (lru.fields || []).forEach(f => addSetupCustomFieldRow(f.name, f.value));
       } else if (mode === 'ADD_SRU' && lru) {
@@ -3085,6 +3190,7 @@
         title.textContent = `Add SRU under ${lru.name}`;
         nameLabel.textContent = 'SRU Name *';
         nameInput.value = '';
+        pnInput.value = '';
         snInput.value = '';
         addSetupCustomFieldRow('HW Rev', '');
         addSetupCustomFieldRow('SW Build', '');
@@ -3095,6 +3201,7 @@
         title.textContent = `${sys.name} → ${lru.name} → ${sru.name}`;
         nameLabel.textContent = 'SRU Name *';
         nameInput.value = sru.name;
+        pnInput.value = sru.partNumber || '';
         snInput.value = sru.serialNumber || '';
         (sru.fields || []).forEach(f => addSetupCustomFieldRow(f.name, f.value));
       }
@@ -3163,6 +3270,7 @@
       const lruId = document.getElementById('setupModalLruId').value;
       const sruId = document.getElementById('setupModalSruId').value;
       const name = document.getElementById('setupModuleName').value.trim();
+      const partNumber = document.getElementById('setupModulePn').value.trim();
       const serialNumber = document.getElementById('setupModuleSn').value.trim();
 
       const rows = document.querySelectorAll('#setupCustomFieldsList .setup-field-row');
@@ -3177,6 +3285,9 @@
         const newLru = {
           id: uid('lru'),
           name,
+          pn: partNumber,
+          sn: serialNumber,
+          partNumber,
           serialNumber,
           fields: customFields,
           srus: []
@@ -3188,7 +3299,7 @@
           systemName: sys.name,
           lruName: name,
           summary: `Added LRU "${name}" to system "${sys.name}"`,
-          details: `S/N: "${serialNumber || '—'}" | ${customFields.length} custom HW/SW version field(s)`
+          details: `P/N: "${partNumber || '—'}", S/N: "${serialNumber || '—'}" | ${customFields.length} custom HW/SW version field(s)`
         });
         showToast(`Added LRU "${name}"`, 'success');
       } else if (mode === 'EDIT_LRU') {
@@ -3196,6 +3307,9 @@
         if (!lru) return;
         const oldName = lru.name;
         lru.name = name;
+        lru.pn = partNumber;
+        lru.sn = serialNumber;
+        lru.partNumber = partNumber;
         lru.serialNumber = serialNumber;
         lru.fields = customFields;
         db.malfunctions.forEach(m => {
@@ -3206,7 +3320,7 @@
           systemName: sys.name,
           lruName: name,
           summary: `Updated LRU architecture for "${oldName}"`,
-          details: `Name: "${name}", S/N: "${serialNumber || '—'}", Fields (${customFields.length}): ${customFields.map(f => `${f.name}=${f.value || '—'}`).join(', ')}`
+          details: `Name: "${name}", P/N: "${partNumber || '—'}", S/N: "${serialNumber || '—'}", Fields (${customFields.length}): ${customFields.map(f => `${f.name}=${f.value || '—'}`).join(', ')}`
         });
         showToast(`Updated LRU "${name}"`, 'success');
       } else if (mode === 'ADD_SRU') {
@@ -3215,6 +3329,9 @@
         const newSru = {
           id: uid('sru'),
           name,
+          pn: partNumber,
+          sn: serialNumber,
+          partNumber,
           serialNumber,
           fields: customFields
         };
@@ -3226,7 +3343,7 @@
           lruName: lru.name,
           sruName: name,
           summary: `Added SRU "${name}" under ${sys.name} / ${lru.name}`,
-          details: `S/N: "${serialNumber || '—'}" | ${customFields.length} custom HW/SW version field(s)`
+          details: `P/N: "${partNumber || '—'}", S/N: "${serialNumber || '—'}" | ${customFields.length} custom HW/SW version field(s)`
         });
         showToast(`Added SRU "${name}" under ${lru.name}`, 'success');
       } else if (mode === 'EDIT_SRU') {
@@ -3236,6 +3353,9 @@
         if (!sru) return;
         const oldName = sru.name;
         sru.name = name;
+        sru.pn = partNumber;
+        sru.sn = serialNumber;
+        sru.partNumber = partNumber;
         sru.serialNumber = serialNumber;
         sru.fields = customFields;
         db.malfunctions.forEach(m => {
@@ -3247,7 +3367,7 @@
           lruName: lru.name,
           sruName: name,
           summary: `Updated SRU architecture for ${lru.name} / "${oldName}"`,
-          details: `Name: "${name}", S/N: "${serialNumber || '—'}", Fields (${customFields.length}): ${customFields.map(f => `${f.name}=${f.value || '—'}`).join(', ')}`
+          details: `Name: "${name}", P/N: "${partNumber || '—'}", S/N: "${serialNumber || '—'}", Fields (${customFields.length}): ${customFields.map(f => `${f.name}=${f.value || '—'}`).join(', ')}`
         });
         showToast(`Updated SRU "${name}"`, 'success');
       }
@@ -3303,7 +3423,7 @@
             lruName: lru.name,
             sruName: sru.name,
             summary: `Deleted SRU "${sru.name}" from ${sys.name} / ${lru.name}`,
-            details: `S/N at deletion: ${sru.serialNumber || '—'}`
+            details: `P/N at deletion: ${sru.partNumber || sru.pn || '—'}, S/N at deletion: ${sru.serialNumber || sru.sn || '—'}`
           });
           persistDb();
           refreshAllViews();
@@ -3361,6 +3481,7 @@
       }
 
       const categoryMeta = {
+        PN_REPLACE: { label: 'P/N Replacement', icon: 'fa-tag', cls: 'badge-lru' },
         SN_REPLACE: { label: 'S/N Replacement', icon: 'fa-barcode', cls: 'badge-in-progress' },
         VERSION_UPDATE: { label: 'HW/SW Version Update', icon: 'fa-code-branch', cls: 'badge-lru' },
         FAULT_CREATED: { label: 'Malfunction Logged', icon: 'fa-triangle-exclamation', cls: 'badge-open' },
@@ -3414,7 +3535,7 @@
       const faultMatches = [];
       const historyMatches = [];
 
-      // 1. Search Systems, LRUs, SRUs, Serial Numbers, and HW/SW Version Fields
+      // 1. Search Systems, LRUs, SRUs, Part Numbers, Serial Numbers, and HW/SW Version Fields
       db.systems.forEach(sys => {
         if (sys.name.toLowerCase().includes(q)) {
           moduleMatches.push({
@@ -3427,7 +3548,7 @@
         }
         sys.lrus.forEach(lru => {
           const lruFieldsText = (lru.fields || []).map(f => `${f.name}: ${f.value}`).join(' | ');
-          const lruHay = `${sys.name} ${lru.name} ${lru.serialNumber || ''} ${lruFieldsText}`.toLowerCase();
+          const lruHay = `${sys.name} ${lru.name} ${lru.partNumber || ''} ${lru.serialNumber || ''} ${lruFieldsText}`.toLowerCase();
           if (lruHay.includes(q)) {
             moduleMatches.push({
               type: 'LRU',
@@ -3435,12 +3556,12 @@
               lruId: lru.id,
               targetCardId: `status-card-${lru.id}`,
               title: `${sys.name} → LRU: ${lru.name}`,
-              subtitle: `S/N: ${lru.serialNumber || '—'}${lruFieldsText ? ` • ${lruFieldsText}` : ''}`
+              subtitle: `P/N: ${lru.partNumber || '—'} • S/N: ${lru.serialNumber || '—'}${lruFieldsText ? ` • ${lruFieldsText}` : ''}`
             });
           }
           lru.srus.forEach(sru => {
             const sruFieldsText = (sru.fields || []).map(f => `${f.name}: ${f.value}`).join(' | ');
-            const sruHay = `${sys.name} ${lru.name} ${sru.name} ${sru.serialNumber || ''} ${sruFieldsText}`.toLowerCase();
+            const sruHay = `${sys.name} ${lru.name} ${sru.name} ${sru.partNumber || ''} ${sru.serialNumber || ''} ${sruFieldsText}`.toLowerCase();
             if (sruHay.includes(q)) {
               moduleMatches.push({
                 type: 'SRU',
@@ -3449,7 +3570,7 @@
                 sruId: sru.id,
                 targetCardId: `status-card-${sru.id}`,
                 title: `${sys.name} → ${lru.name} → SRU: ${sru.name}`,
-                subtitle: `S/N: ${sru.serialNumber || '—'}${sruFieldsText ? ` • ${sruFieldsText}` : ''}`
+                subtitle: `P/N: ${sru.partNumber || '—'} • S/N: ${sru.serialNumber || '—'}${sruFieldsText ? ` • ${sruFieldsText}` : ''}`
               });
             }
           });
@@ -3610,14 +3731,14 @@
       db.lastUpdated = new Date().toISOString();
       const jsonString = JSON.stringify(db, null, 2);
       const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
-      const fileName = `GCL-Database-${stamp}.json`;
+      const fileName = `SLCT-Database-${stamp}.json`;
 
       // Use File System Access API when supported and not blocked by iframe
       if (window.showSaveFilePicker) {
         try {
           const handle = await window.showSaveFilePicker({
             suggestedName: fileName,
-            types: [{ description: 'GCL JSON Database', accept: { 'application/json': ['.json'] } }]
+            types: [{ description: 'SLCT JSON Database', accept: { 'application/json': ['.json'] } }]
           });
           const writable = await handle.createWritable();
           await writable.write(jsonString);
@@ -3651,11 +3772,11 @@
         try {
           const parsed = JSON.parse(e.target.result);
           if (!parsed || !Array.isArray(parsed.systems)) {
-            showToast('Invalid GCL JSON file structure', 'error');
+            showToast('Invalid SLCT JSON file structure', 'error');
             return;
           }
           db = {
-            app: parsed.app || 'Genius Configuration and Log (GCL)',
+            app: parsed.app || 'System Log and Configuration Tool (SLCT)',
             schemaVersion: parsed.schemaVersion || '2.4',
             lastUpdated: new Date().toISOString(),
             systems: parsed.systems || [],
@@ -3671,7 +3792,7 @@
           addHistoryRecord({
             category: 'SYSTEM_SETUP',
             systemName: 'Database',
-            summary: `Loaded GCL database from file "${file.name}"`,
+            summary: `Loaded SLCT database from file "${file.name}"`,
             details: `${db.systems.length} systems, ${db.malfunctions.length} malfunction logs`
           });
           persistDb();
@@ -3726,7 +3847,7 @@
       const totalLrus = db.systems.reduce((acc, s) => acc + s.lrus.length, 0);
       const totalSrus = db.systems.reduce((acc, s) => acc + s.lrus.reduce((a, l) => a + l.srus.length, 0), 0);
       document.getElementById('dbStatsSummary').innerHTML = `
-        <div class="font-bold">Current GCL Workspace Summary:</div>
+        <div class="font-bold">Current SLCT Workspace Summary:</div>
         <div>• <strong>${db.systems.length}</strong> Electronic System(s) (${totalLrus} LRUs, ${totalSrus} SRUs)</div>
         <div>• <strong>${db.malfunctions.length}</strong> Malfunction Log Entries</div>
         <div>• <strong>${db.history.length}</strong> Timestamped History Records</div>
@@ -3781,20 +3902,20 @@
       const sys = db.systems.find(s => s.id === state.selectedSystemId);
       if (!sys) return;
       const rows = [
-        ['System Name', 'Level', 'LRU Name', 'SRU Name', 'Serial Number', 'HW/SW Version Fields', 'Active Faults']
+        ['System Name', 'Level', 'LRU Name', 'SRU Name', 'Part Number (P/N)', 'Serial Number (S/N)', 'HW/SW Version Fields', 'Active Faults']
       ];
       sys.lrus.forEach(lru => {
         const lruVer = (lru.fields || []).map(f => `${f.name}: ${f.value}`).join(' | ');
         const lruFaults = db.malfunctions.filter(m => m.systemId === sys.id && m.lruId === lru.id && m.status !== 'Closed').length;
-        rows.push([sys.name, 'LRU', lru.name, '', lru.serialNumber || '', lruVer, lruFaults]);
+        rows.push([sys.name, 'LRU', lru.name, '', lru.partNumber || '', lru.serialNumber || '', lruVer, lruFaults]);
 
         lru.srus.forEach(sru => {
           const sruVer = (sru.fields || []).map(f => `${f.name}: ${f.value}`).join(' | ');
           const sruFaults = db.malfunctions.filter(m => m.systemId === sys.id && m.lruId === lru.id && m.sruId === sru.id && m.status !== 'Closed').length;
-          rows.push([sys.name, 'SRU', lru.name, sru.name, sru.serialNumber || '', sruVer, sruFaults]);
+          rows.push([sys.name, 'SRU', lru.name, sru.name, sru.partNumber || '', sru.serialNumber || '', sruVer, sruFaults]);
         });
       });
-      downloadCsvFile(`GCL-SystemStatus-${sys.name}.csv`, rows);
+      downloadCsvFile(`SLCT-SystemStatus-${sys.name}.csv`, rows);
     }
 
     function exportMalfunctionsCSV() {
@@ -3816,7 +3937,7 @@
           m.resolution || ''
         ]);
       });
-      downloadCsvFile(`GCL-MalfunctionLog-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+      downloadCsvFile(`SLCT-MalfunctionLog-${new Date().toISOString().slice(0, 10)}.csv`, rows);
     }
 
     function exportHistoryCSV() {
@@ -3836,7 +3957,7 @@
           h.details || ''
         ]);
       });
-      downloadCsvFile(`GCL-HistoryLog-${new Date().toISOString().slice(0, 10)}.csv`, rows);
+      downloadCsvFile(`SLCT-HistoryLog-${new Date().toISOString().slice(0, 10)}.csv`, rows);
     }
 
     function openReportPreview(reportType) {
@@ -3858,6 +3979,7 @@
               <td>LRU</td>
               <td>${escapeHtml(lru.name)}</td>
               <td>—</td>
+              <td class="font-mono-code">${escapeHtml(lru.partNumber || '—')}</td>
               <td class="font-mono-code">${escapeHtml(lru.serialNumber || '—')}</td>
               <td>${lruFields || '—'}</td>
             </tr>
@@ -3869,6 +3991,7 @@
                 <td>SRU</td>
                 <td>${escapeHtml(lru.name)}</td>
                 <td><strong>${escapeHtml(sru.name)}</strong></td>
+                <td class="font-mono-code">${escapeHtml(sru.partNumber || '—')}</td>
                 <td class="font-mono-code">${escapeHtml(sru.serialNumber || '—')}</td>
                 <td>${sruFields || '—'}</td>
               </tr>
@@ -3880,7 +4003,7 @@
           <div class="space-y-4">
             <div class="border-b-2 border-slate-800 pb-3 flex justify-between items-start">
               <div>
-                <h1 class="text-lg font-extrabold">GCL — System Configuration Status Report</h1>
+                <h1 class="text-lg font-extrabold">System Log and Configuration Tool — Configuration Status Report</h1>
                 <p class="text-xs text-slate-600">System: <strong>${escapeHtml(sys.name)}</strong> (${sys.lrus.length} LRUs)</p>
               </div>
               <div class="text-right text-xs text-slate-600">
@@ -3894,6 +4017,7 @@
                   <th class="border border-slate-400 p-2 text-left">Type</th>
                   <th class="border border-slate-400 p-2 text-left">LRU</th>
                   <th class="border border-slate-400 p-2 text-left">SRU</th>
+                  <th class="border border-slate-400 p-2 text-left">Part Number (P/N)</th>
                   <th class="border border-slate-400 p-2 text-left">Serial Number (S/N)</th>
                   <th class="border border-slate-400 p-2 text-left">Hardware &amp; Software Versions</th>
                 </tr>
@@ -3922,7 +4046,7 @@
           <div class="space-y-4">
             <div class="border-b-2 border-slate-800 pb-3 flex justify-between items-start">
               <div>
-                <h1 class="text-lg font-extrabold">GCL — System Malfunction &amp; Resolution Report</h1>
+                <h1 class="text-lg font-extrabold">System Log and Configuration Tool — Malfunction &amp; Resolution Report</h1>
                 <p class="text-xs text-slate-600">Total Filtered Entries: <strong>${list.length}</strong></p>
               </div>
               <div class="text-right text-xs text-slate-600">
@@ -3964,7 +4088,7 @@
           <div class="space-y-4">
             <div class="border-b-2 border-slate-800 pb-3 flex justify-between items-start">
               <div>
-                <h1 class="text-lg font-extrabold">GCL — Configuration &amp; Activity History Audit Report</h1>
+                <h1 class="text-lg font-extrabold">System Log and Configuration Tool — History Audit Report</h1>
                 <p class="text-xs text-slate-600">Records: <strong>${list.length}</strong></p>
               </div>
               <div class="text-right text-xs text-slate-600">
