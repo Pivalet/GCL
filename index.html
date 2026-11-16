@@ -343,7 +343,6 @@
             <div>
               <div class="flex items-center gap-2">
                 <h1 class="font-extrabold text-base sm:text-lg tracking-tight leading-none">System Log and Configuration Tool</h1>
-                <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full t-elevated border t-text-secondary">SLCT v2.4</span>
               </div>
               <p class="text-xs t-text-muted hidden sm:block">Electronic System Configuration, P/N &amp; S/N Tracking, and Malfunction Log</p>
             </div>
@@ -1258,10 +1257,6 @@
               <i class="fa-solid fa-upload"></i>
               <span>Load SLCT JSON File from Device</span>
             </button>
-            <button onclick="confirmResetDemoData()" class="w-full min-h-[44px] px-4 py-2.5 rounded-xl t-elevated border text-rose-600 font-bold flex items-center justify-center gap-2">
-              <i class="fa-solid fa-rotate-left"></i>
-              <span>Reset to Default "Genius" Demo Database</span>
-            </button>
           </div>
         </div>
       </div>
@@ -1809,7 +1804,7 @@
     /* ========================================================================
        4. THEME SWITCHER (LIGHT / GREYSCALE / DARK)
        ======================================================================== */
-    function setTheme(themeName, notify = true) {
+    function setTheme(themeName) {
       const valid = ['light', 'greyscale', 'dark'];
       const chosen = valid.includes(themeName) ? themeName : 'light';
       state.theme = chosen;
@@ -1825,11 +1820,6 @@
           btn.className = 'min-h-[36px] px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition t-text-secondary hover:opacity-80';
         }
       });
-
-      if (notify) {
-        const label = chosen === 'light' ? 'Light (Default)' : chosen === 'greyscale' ? 'High-Contrast Greyscale' : 'Dark Lab';
-        showToast(`Theme switched to ${label}`, 'info');
-      }
     }
 
     /* ========================================================================
@@ -3506,15 +3496,43 @@
               ${h.details ? `<p class="font-mono-code text-xs t-text-secondary break-words">${escapeHtml(h.details)}</p>` : ''}
             </div>
 
-            <div class="flex sm:flex-col items-center sm:items-end justify-between gap-1 text-xs shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 t-border">
-              <span class="font-bold px-2 py-0.5 rounded t-elevated border">
-                <i class="fa-solid fa-user mr-1 text-blue-500"></i>${escapeHtml(h.username)}
-              </span>
+            <div class="flex sm:flex-col items-center sm:items-end justify-between gap-1.5 text-xs shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 t-border">
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold px-2 py-0.5 rounded t-elevated border">
+                  <i class="fa-solid fa-user mr-1 text-blue-500"></i>${escapeHtml(h.username)}
+                </span>
+                <button
+                  type="button"
+                  onclick="confirmDeleteHistoryEntry('${escapeHtml(h.id)}')"
+                  class="min-h-[32px] px-2.5 py-1 rounded-lg t-elevated border text-rose-600 font-bold flex items-center gap-1 hover:opacity-80 transition"
+                  title="Delete History Entry"
+                >
+                  <i class="fa-solid fa-trash-can"></i>
+                  <span>Delete</span>
+                </button>
+              </div>
               <span class="t-text-muted text-[11px]">${formatDisplayDate(h.timestamp)}</span>
             </div>
           </div>
         `;
       }).join('');
+    }
+
+    function confirmDeleteHistoryEntry(historyId) {
+      const entry = db.history.find(h => h.id === historyId);
+      if (!entry) return;
+
+      openConfirmDialog(
+        'Delete History Entry?',
+        `Are you sure you want to permanently delete this history entry ("${entry.summary}")?`,
+        () => {
+          db.history = db.history.filter(h => h.id !== historyId);
+          persistDb();
+          populateHistorySystemFilter();
+          renderHistoryView();
+          showToast('History entry deleted', 'info');
+        }
+      );
     }
 
     /* ========================================================================
@@ -4171,4 +4189,3 @@
   </script>
 </body>
 </html>
-```
